@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 
 
 
-version = '0.2'
+version = '0.1'
 
 username = getpass.getuser()
 
@@ -293,10 +293,10 @@ def check_update():
 	global version
 	print('Checking update...')
 	response = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/version')
-	new_version = response.text
+	new_version = response.text[:3]
 	if(version != new_version):
 		os.system('cls')
-		cf = input('New Update! Do you want update? [Y/N] ')
+		cf = input(f'New Update! Version {new_version}\nDo you want update? [Y/N] ')
 		if (cf.isalpha()):
 			cf = cf.upper()
 		while(cf != 'Y' and cf != 'N'):
@@ -307,7 +307,7 @@ def check_update():
 				cf = cf.upper()
 		if (cf == 'Y'):
 			update()
-	version = new_version
+		version = new_version
 
 
 def _main():
