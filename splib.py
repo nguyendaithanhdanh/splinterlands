@@ -1,4 +1,4 @@
-from selenium import webdriver
+\from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
@@ -276,10 +276,10 @@ def menu():
 				select = select.upper()
 	return select
 
-def shutDown():
+def countDown():
 	for i in range(3,0,-1):
 		os.system('cls')
-		print(f'Not working! Shut down in {i}')
+		print(f'Shut down in {i}')
 		time.sleep(1)
 
 
@@ -310,18 +310,26 @@ def check_update():
 			print('Updating...')
 			update()
 			os.system('cls')
-			print('Done')
+			print('Updated!')
 			time.sleep(1)
+			countDown()
+			return 'OK'
+
+
 			
 
 
 def _main():
-	check_update()
-	select = menu()	
+	select = ''
+	upd = check_update()
+	if upd == 'OK':
+		select = 'Q'
+	else:
+		select = menu()
 	while (select != 'Q'):
 		os.system('cls')
 		if (select == '1'):
-			shutDown()
+			countDown()
 			select = menu()
 		elif (select == '2'):
 			n = addTeam()
