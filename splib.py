@@ -3,11 +3,12 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 
-import getpass, time, io, json, random, os
+import getpass, time, io, json, random, os, requests
 from bs4 import BeautifulSoup
 
 
 
+version = '0.1'
 
 username = getpass.getuser()
 
@@ -242,3 +243,83 @@ def createCard():
 		card[name[i].text] = {"level": int(lv[2]), "mana": int(mana[i].text)}
 	with open(card_path, 'w') as file:
 		b = json.dump(card, file, indent=4)
+
+
+
+logo = '''
+					░██████╗██████╗░██╗░░░░░██╗██████╗░
+					██╔════╝██╔══██╗██║░░░░░██║██╔══██╗
+					╚█████╗░██████╔╝██║░░░░░██║██████╦╝
+					░╚═══██╗██╔═══╝░██║░░░░░██║██╔══██╗
+					██████╔╝██║░░░░░███████╗██║██████╦╝
+					╚═════╝░╚═╝░░░░░╚══════╝╚═╝╚═════╝░
+'''
+
+def menu():
+	os.system('cls')
+	#print('\t****TEAM MANAGE****')
+	print(logo)
+	print(f"\t\t\t\t\t\t    Version {version}")
+	print('\n1. START GAME\n2. Add team\n3. View team\n\n[Q]uit')
+	select = input('\nSelect: ')
+	if (select.isalpha()):
+		select = select.upper()
+	while (select!='1' and select!='2' and select!='3' and select!='Q'):
+		os.system('cls')
+		#print('\t****TEAM MANAGE****')
+		print(logo)
+		print(f"\t\t\t\t\t\t    Version {version}")
+		print('\n1. START GAME\n2. Add team\n3. View team\n\n[Q]uit')
+		print("Invalid syntax! Try again.")
+		select = input('\nSelect: ')
+		if (select.isalpha()):
+				select = select.upper()
+	return select
+
+def shutDown():
+	for i in range(3,0,-1):
+		os.system('cls')
+		print(f'Not working! Shut down in {i}')
+		time.sleep(1)
+
+
+def update():
+	response = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/splib.py')
+	f = io.open('splib.py', mode="w", encoding="utf-8")
+	f.write(response.text)
+	f.close()
+
+def check_update():
+	print('Checking update...')
+	response = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/version')
+	if(version != response.text):
+		os.system('cls')
+		cf = input('New Update! Do you want update? [Y/N] ')
+		if (cf.isalpha()):
+			cf = cf.upper()
+		while(cf != 'Y' and cf != 'N'):
+			os.system('cls')
+			print("Invalid syntax! Try again.")
+			cf = input('New Update! Do you want update? [Y/N] ')
+			if (cf.isalpha()):
+				cf = cf.upper()
+		if (cf == 'Y'):
+			update()
+
+
+def _main():
+	check_update()
+	select = menu()	
+	while (select != 'Q'):
+		os.system('cls')
+		if (select == '1'):
+			shutDown()
+			select = menu()
+		elif (select == '2'):
+			n = addTeam()
+			if (n == 'Q'):
+				select = menu()
+		elif (select == '3'):
+			n = viewTeam()
+			if (n == 'Q'):
+				select = menu()
