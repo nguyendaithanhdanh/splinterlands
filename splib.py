@@ -201,30 +201,21 @@ def showList(list):
 		print('-'*20)
 
 
-def ranTeam(Team1, Team2):
-	a = random.randint(1,2)
-	if (a==1):
-		return Team1
+def ranTeam(team):
+	if len(team) == 1:
+		return team[0]
 	else:
-		return Team2
+		a = random.randrange(0,len(team))
+		return team[a]
 
 def pickTeam(x):
 	with open(team_path) as json_file:
 		team = json.load(json_file)
-	switcher={
-		12: ranTeam(team['12'][0], team['12'][1]),
-		13: team['13'],
-		14: team['14'],
-		15: team['15'],
-		16: ranTeam(team['16'][0], team['16'][1]),
-		17: ranTeam(team['17'][0], team['17'][1]),
-		18: ranTeam(team['18'][0], team['18'][1]),
-		19: team['19'],
-		21: team['21'],
-		22: team['22'],
-		26: team['26']
-	}
-	return switcher.get(x, "No team")
+		t = team.get(str(x), "None")
+	if t != 'None':
+		return ranTeam(t)
+	else:
+		return t
 
 
 def createCard():
