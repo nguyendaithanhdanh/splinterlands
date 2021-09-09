@@ -290,9 +290,11 @@ def update():
 	f.close()
 
 def check_update():
+	global version
 	print('Checking update...')
 	response = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/version')
-	if(version != response.text):
+	new_version = response.text
+	if(version != new_version):
 		os.system('cls')
 		cf = input('New Update! Do you want update? [Y/N] ')
 		if (cf.isalpha()):
@@ -305,6 +307,7 @@ def check_update():
 				cf = cf.upper()
 		if (cf == 'Y'):
 			update()
+	version = new_version
 
 
 def _main():
