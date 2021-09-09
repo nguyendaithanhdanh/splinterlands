@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 
 
 
-version = '0.2'
+version = '0.1'
 
 username = getpass.getuser()
 
@@ -307,7 +307,7 @@ def check_update():
 				cf = cf.upper()
 		if (cf == 'Y'):
 			update()
-		version = new_version
+			version = new_version
 
 
 def _main():
