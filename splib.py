@@ -306,8 +306,13 @@ def check_update():
 			if (cf.isalpha()):
 				cf = cf.upper()
 		if (cf == 'Y'):
+			os.system('cls')
+			print('Updating...')
 			update()
-			version = new_version
+			os.system('cls')
+			print('Done')
+			time.sleep(1)
+			
 
 
 def _main():
