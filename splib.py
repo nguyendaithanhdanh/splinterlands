@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 
 
 
-version = '0.2'
+version = '0.3'
 
 username = getpass.getuser()
 
