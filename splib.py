@@ -337,7 +337,7 @@ def btn(x,li):
 
 def _main():
 	select = ''
-	upd = check_getUpdate()
+	upd = check_update()
 	if upd == 'OK':
 		select = 'Q'
 	else:
