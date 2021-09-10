@@ -292,10 +292,10 @@ def shutDown(mess):
 		print(f'Shut down in {i}')
 		time.sleep(1)
 def update():
-	response = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/splib.py')
-	f = io.open('splib.py', mode="w", encoding="utf-8")
-	f.write(response.text)
-	f.close()
+	splib = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/splib.py')
+	saveFile('splib.py', splib.text)
+	upd = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/update.py')
+	saveFile('update.py', upd.text)
 
 def check_update():
 	global version
