@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 import getpass, time, io, json, random, os, requests, update
 
 
-version = '0.22'
+version = '0.21'
 username = getpass.getuser()
 usr_path=('C:/Users/', username, '/AppData/Local/Google/Chrome/User Data')
 filePath = ''.join(usr_path)
@@ -315,6 +315,7 @@ def check_getUpdate():
 		if (cf == 'Y'):
 			os.system('cls')
 			print('Updating...')
+			getUpdate()
 			update.update_lib()
 			os.system('cls')
 			time.sleep(1)
