@@ -135,15 +135,20 @@ def addTeam():
 		elif (select == 'S'):
 			c = team.get(mana, 0)
 			if (c != 0):
-				team[mana].append(team_adding)
+				team[str(mana)].append(team_adding)
 			else:
-				team[mana] = []
-				team[mana].append(team_adding)
+				team[str(mana)] = []
+				team[str(mana)].append(team_adding)
+			s = sorted(team)
+			team_sorted = {}
+			for i in s:
+				p = team.get(i)
+				team_sorted[i] = p
 			with open(team_path, 'w') as file:
-				d = json.dump(team, file, indent=4)
+				d = json.dump(team_sorted, file, indent=4)
 			team_adding.clear()
 		elif (select == 'C'):
-			team_adding.clear()		
+			team_adding.clear()
 		elif (select == 'M'):
 			os.system('cls')
 			mana = inputMana()
@@ -183,13 +188,15 @@ def delTeam():
 	td = input('\nSelect: ')
 	os.system('cls')
 	st = lt[int(td)-1]
-	acpt = input(f'Team selected:\n{st}\n\nAre you want delete this team? [Y/N]\nSelect: ')
+	acpt = input(f'Team selected:\n{st}\n\nAre you want delete this team? [Y/N]\nSelect: ').upper()
 	if acpt == 'Y':
 		list_team[x].pop(int(td)-1)
+		if len(list_team[x]) == 0:
+			list_team.pop(x)
 		with open(team_path, 'w') as file:
 			b = json.dump(list_team, file, indent=4)
 		print('Done')
-		time.sleep(1)
+		time.sleep(2)
 		return 'Q'
 	else:
 		return 'Q'
