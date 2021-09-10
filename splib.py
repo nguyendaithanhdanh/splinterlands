@@ -3,7 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from bs4 import BeautifulSoup
-import getpass, time, io, json, random, os, requests, update
+import getpass, time, io, json, random, os, requests
 
 
 version = '0.22'
@@ -291,36 +291,38 @@ def shutDown(mess):
 		print(mess)
 		print(f'Shut down in {i}')
 		time.sleep(1)
+def update():
+	response = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/splib.py')
+	f = io.open('splib.py', mode="w", encoding="utf-8")
+	f.write(response.text)
+	f.close()
 
-def getUpdate():
-	response = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/update.py')
-	saveFile('update.py', response.text)
-
-def check_getUpdate():
+def check_update():
 	global version
-	print('Checking getUpdate...')
+	print('Checking update...')
 	response = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/version')
-	new_version = response.text[:4]
+	new_version = response.text[:3]
 	if(version != new_version):
 		os.system('cls')
-		cf = input(f'New getUpdate! Version {new_version}\nDo you want getUpdate? [Y/N] ')
+		cf = input(f'New Update! Version {new_version}\nDo you want update? [Y/N] ')
 		if (cf.isalpha()):
 			cf = cf.upper()
 		while(cf != 'Y' and cf != 'N'):
 			os.system('cls')
 			print("Invalid syntax! Try again.")
-			cf = input('New getUpdate! Do you want getUpdate? [Y/N] ')
+			cf = input('New Update! Do you want update? [Y/N] ')
 			if (cf.isalpha()):
 				cf = cf.upper()
 		if (cf == 'Y'):
 			os.system('cls')
 			print('Updating...')
-			getUpdate()
-			update.update_lib()
+			update()
 			os.system('cls')
 			time.sleep(1)
-			shutDown('getUpdated!')
+			shutDown('Updated!')
 			return 'OK'
+		else:
+			shutDown('This version is too old, please update to the latest version!')
 
 def btn(x,li):
 
