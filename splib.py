@@ -265,8 +265,9 @@ def shutDown(mess):
 
 def update():
 	response = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/splib.py')
-	with open('splib.py', mode="w", encoding="utf-8") as f:
-		f.write(response.content)
+	f = io.open('splib.py', mode="w", encoding="utf-8"):
+	f.write(response.content)
+	f.close()
 
 def check_update():
 	global version
