@@ -298,12 +298,12 @@ def getUpdate():
 
 def check_update():
 	global version
-	print('Checking getUpdate...')
+	print('Checking Update...')
 	response = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/version')
 	new_version = response.text[:4]
 	if(version != new_version):
 		os.system('cls')
-		cf = input(f'New getUpdate! Version {new_version}\nDo you want getUpdate? [Y/N] ')
+		cf = input(f'New Update! Version {new_version}\nDo you want Update? [Y/N] ')
 		if (cf.isalpha()):
 			cf = cf.upper()
 		while(cf != 'Y' and cf != 'N'):
