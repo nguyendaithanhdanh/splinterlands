@@ -2,19 +2,14 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
-
-import getpass, time, io, json, random, os, requests
 from bs4 import BeautifulSoup
-
+import getpass, time, io, json, random, os, requests
 
 
 version = '0.21'
-
 username = getpass.getuser()
-
 usr_path=('C:/Users/', username, '/AppData/Local/Google/Chrome/User Data')
 filePath = ''.join(usr_path)
-
 card_path = './data/card.json'
 team_path = './data/team.json'
 src_web_path = './data/source_web.html'
@@ -26,11 +21,6 @@ for i in card:
 	list_card_name.append(i)
 list_name = sorted(list_card_name)
 mana = 0
-
-
-
-
-
 
 def initDriver():
 	chrome_options = webdriver.ChromeOptions()
@@ -44,28 +34,19 @@ def initDriver():
 	driver = webdriver.Chrome('./data/webdriver/chromedriver', options = chrome_options)
 	driver.get('https://splinterlands.com/?p=battle_history') 
 	#time.sleep(5)
-
 	#SELECT BATTLE MODE
 	driver.execute_script("var roww = document.getElementsByClassName('row')[1].innerHTML;var reg = /HOW TO PLAY|PRACTICE|CHALLENGE|RANKED/;var resultt = roww.match(reg);while(resultt != 'RANKED'){document.getElementsByClassName('slider_btn')[1].click();roww = document.getElementsByClassName('row')[1].innerHTML;resultt = roww.match(reg);};")
-
 	#BATTLE
 	driver.execute_script("document.getElementsByClassName('big_category_btn red')[0].click();")
-
 	time.sleep(10)
-
 	#Create team
 	driver.execute_script("document.getElementsByClassName('btn btn--create-team')[0].click();")
-
-
-
-
 
 def checkMana(add):
 	mana = 0
 	for i in add:
 		mana += card[i]['mana']
 	return mana
-
 
 def inputMana():
 	mana = input('Mana: ')
@@ -74,9 +55,6 @@ def inputMana():
 		print('Opps, try again!')
 		mana = input('Mana: ')
 	return int(mana)
-
-
-
 
 def menuOpt(select, team_adding):
 	global mana
@@ -120,7 +98,6 @@ def menuOpt(select, team_adding):
 			time.sleep(1)
 	return select
 
-
 def showListName():
 	n = 1
 	print('\tCard Name\tMana\n')
@@ -131,8 +108,6 @@ def showListName():
 		else:
 			print(f'{n}{".":<2}{i:<20} {mn}')
 		n += 1
-
-
 
 def addTeam():
 	with open(team_path) as json_file:
@@ -167,20 +142,14 @@ def addTeam():
 			with open(team_path, 'w') as file:
 				d = json.dump(team, file, indent=4)
 			team_adding.clear()
-		
-
 		elif (select == 'C'):
-			team_adding.clear()
-
-		
+			team_adding.clear()		
 		elif (select == 'M'):
 			os.system('cls')
 			mana = inputMana()
-		
 		print(team_adding)
 	return select
 	
-
 def viewTeam():
 	with open(team_path) as json_file:
 		team = json.load(json_file)
@@ -189,14 +158,12 @@ def viewTeam():
 		for j in team[i]:
 			print(j)
 
-
 def showList(list):
 	if (len(list) > 0):
 		print('-'*20)
 		for i in range(len(list)):
 			print(f'{i+1}. {list[i]} ')
 		print('-'*20)
-
 
 def delTeam():
 	with open(team_path) as json_file:
@@ -244,24 +211,18 @@ def pickTeam(x):
 	else:
 		return t
 
-
 def createCard():
 	with open(src_web_path, mode="r", encoding="utf-8") as fp:
 		soup = BeautifulSoup(fp, 'html.parser')
-
-
 	name = soup.find_all(class_="card-name-name")
 	level = soup.find_all(class_="card-name-level")
 	mana = soup.find_all(class_="stat-text-mana")
-
-
 	card = {}
 	for i in range(95):
 		lv = level[i].text
 		card[name[i].text] = {"level": int(lv[2]), "mana": int(mana[i].text)}
 	with open(card_path, 'w') as file:
 		b = json.dump(card, file, indent=4)
-
 
 
 logo = '''
@@ -302,7 +263,6 @@ def shutDown(mess):
 		print(f'Shut down in {i}')
 		time.sleep(1)
 
-
 def update():
 	response = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/splib.py')
 	f = io.open('splib.py', mode="w", encoding="utf-8")
@@ -313,7 +273,7 @@ def check_update():
 	global version
 	print('Checking update...')
 	response = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/version')
-	new_version = response.text[:3]
+	new_version = response.text[:4]
 	if(version != new_version):
 		os.system('cls')
 		cf = input(f'New Update! Version {new_version}\nDo you want update? [Y/N] ')
@@ -334,7 +294,6 @@ def check_update():
 			shutDown('Updated!')
 			return 'OK'
 
-
 def btn(x,li):
 
 	if (x.isalpha()):
@@ -345,7 +304,6 @@ def btn(x,li):
 			check = True
 			break	
 	return check		
-
 
 def _main():
 	select = ''
