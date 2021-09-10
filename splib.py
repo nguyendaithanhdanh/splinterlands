@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 
 
 
-version = '0.2'
+version = '0.21'
 
 username = getpass.getuser()
 
@@ -85,7 +85,8 @@ def menuOpt(select, team_adding):
 	if (select.isdigit()):
 		if(int(select) <= 0 or int(select) > 95):
 			select = ''
-	while (select != 'S' and select != 'C' and select != 'Q' and select != 'M' and (not select.isdigit())):
+	list_options = ['S', 'C', 'Q', 'M']
+	while (not btn(select, list_options) and (not select.isdigit())):
 		os.system('cls')
 		showListName()
 		print("\n")
@@ -187,10 +188,6 @@ def viewTeam():
 		print(f'Mana: {i}')
 		for j in team[i]:
 			print(j)
-		print("\n")
-
-	n = input('[Q]uit?\nSelect: ').upper()
-	return n
 
 
 def showList(list):
@@ -199,6 +196,36 @@ def showList(list):
 		for i in range(len(list)):
 			print(f'{i+1}. {list[i]} ')
 		print('-'*20)
+
+
+def delTeam():
+	with open(team_path) as json_file:
+		list_team = json.load(json_file)
+	os.system('cls')
+	viewTeam()
+	x = input('\nSelect a mana: ')
+	os.system('cls')
+	print(f'Mana: {x}')
+	print('\nSelect a team to delete:\n')
+	lt = list_team.get(x, 'None')
+	if lt != 'None':
+		for i in range(len(lt)):
+			print(f'{i+1}. {lt[i]}')
+	else:
+		print('No team found!')
+	td = input('\nSelect: ')
+	os.system('cls')
+	st = lt[int(td)-1]
+	acpt = input(f'Team selected:\n{st}\n\nAre you want delete this team? [Y/N]\nSelect: ')
+	if acpt == 'Y':
+		list_team[x].pop(int(td)-1)
+		with open(team_path, 'w') as file:
+			b = json.dump(list_team, file, indent=4)
+		print('Done')
+		time.sleep(1)
+		return 'Q'
+	else:
+		return 'Q'
 
 
 def ranTeam(team):
@@ -251,20 +278,21 @@ def menu():
 	#print('\t****TEAM MANAGE****')
 	print(logo)
 	print(f"\t\t\t\t\t\t    Version {version}")
-	print('\n1. START GAME\n2. Add team\n3. View team\n\n[Q]uit')
+	print('\n1. START GAME\n2. Add team\n3. View team\n4. Delete team\n\n[Q]uit')
 	select = input('\nSelect: ')
-	if (select.isalpha()):
+	if select.isalpha():
 		select = select.upper()
-	while (select!='1' and select!='2' and select!='3' and select!='Q'):
+	list_op = ['1', '2', '3','4', 'Q']
+	while (not btn(select, list_op)):
 		os.system('cls')
 		#print('\t****TEAM MANAGE****')
 		print(logo)
 		print(f"\t\t\t\t\t\t    Version {version}")
-		print('\n1. START GAME\n2. Add team\n3. View team\n\n[Q]uit')
+		print('\n1. START GAME\n2. Add team\n3. View team\n4. Delete team\n\n[Q]uit')
 		print("Invalid syntax! Try again.")
 		select = input('\nSelect: ')
-		if (select.isalpha()):
-				select = select.upper()
+		if select.isalpha():
+			select = select.upper()
 	return select
 
 def shutDown(mess):
@@ -307,7 +335,16 @@ def check_update():
 			return 'OK'
 
 
-			
+def btn(x,li):
+
+	if (x.isalpha()):
+		x = x.upper()
+	check = False
+	for i in li:
+		if x == i:
+			check = True
+			break	
+	return check		
 
 
 def _main():
@@ -320,13 +357,19 @@ def _main():
 	while (select != 'Q'):
 		os.system('cls')
 		if (select == '1'):
-			shutDown()
+			shutDown('Not Available')
 			select = menu()
 		elif (select == '2'):
 			n = addTeam()
 			if (n == 'Q'):
 				select = menu()
 		elif (select == '3'):
-			n = viewTeam()
+			viewTeam()
+			n = input('\n[Q]uit?\nSelect: ').upper()
 			if (n == 'Q'):
 				select = menu()
+		elif (select == '4'):
+			n = delTeam()
+			if (n == 'Q'):
+				select = menu()
+	os.system('cls')
