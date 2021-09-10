@@ -3,10 +3,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from bs4 import BeautifulSoup
-import getpass, time, io, json, random, os, requests
+import getpass, time, io, json, random, os, requests, update
 
 
-version = '0.21'
+version = '0.22'
 username = getpass.getuser()
 usr_path=('C:/Users/', username, '/AppData/Local/Google/Chrome/User Data')
 filePath = ''.join(usr_path)
@@ -48,6 +48,12 @@ def checkMana(add):
 		mana += card[i]['mana']
 	return mana
 
+def saveFile(filePath, content):
+	f = io.open(filePath, mode="w", encoding="utf-8")
+	f.write(content)
+	f.close()
+
+
 def inputMana():
 	mana = input('Mana: ')
 	while(not mana.isdigit()):
@@ -83,7 +89,8 @@ def menuOpt(select, team_adding):
 			select = ''
 			time.sleep(1)
 		else:
-			print('Saved')
+			os.system('cls')
+			print('Team was saved!')
 			'''
 			notifi = input('Do you want continue? [Y/N] ').upper()
 			while (notifi != 'Y' and notifi != 'N'):
@@ -109,9 +116,22 @@ def showListName():
 			print(f'{n}{".":<2}{i:<20} {mn}')
 		n += 1
 
+def teamSorted(team):
+	s = team.keys()
+	s_int = []
+	for i in s:
+		s_int.append(int(i))
+	s_sorted = sorted(s_int)
+
+	team_sorted = {}
+	for i in s_sorted:
+		p = team.get(str(i))
+		team_sorted[i] = p
+	return team_sorted
+
+
 def addTeam():
-	with open(team_path) as json_file:
-		team = json.load(json_file)
+
 	team_adding = []
 	
 	global mana
@@ -119,6 +139,8 @@ def addTeam():
 
 	select=''
 	while (select != 'Q'):
+		with open(team_path) as file:
+			team = json.load(file)
 		os.system('cls')
 		showListName()
 		print("\n")
@@ -130,20 +152,18 @@ def addTeam():
 		
 		if (select.isdigit()):
 			team_adding.append(list_name[int(select)-1])
-
+ 
 		#Save
 		elif (select == 'S'):
-			c = team.get(mana, 0)
-			if (c != 0):
+			c = team.get(str(mana), 'NotFound')
+			if (c != 'NotFound'):
 				team[str(mana)].append(team_adding)
 			else:
 				team[str(mana)] = []
 				team[str(mana)].append(team_adding)
-			s = sorted(team)
-			team_sorted = {}
-			for i in s:
-				p = team.get(i)
-				team_sorted[i] = p
+			
+			team_sorted = teamSorted(team)
+
 			with open(team_path, 'w') as file:
 				d = json.dump(team_sorted, file, indent=4)
 			team_adding.clear()
@@ -162,6 +182,7 @@ def viewTeam():
 		print(f'Mana: {i}')
 		for j in team[i]:
 			print(j)
+		print()
 
 def showList(list):
 	if (len(list) > 0):
@@ -195,8 +216,9 @@ def delTeam():
 			list_team.pop(x)
 		with open(team_path, 'w') as file:
 			b = json.dump(list_team, file, indent=4)
+		os.system('cls')
 		print('Done')
-		time.sleep(2)
+		time.sleep(1)
 		return 'Q'
 	else:
 		return 'Q'
@@ -270,35 +292,33 @@ def shutDown(mess):
 		print(f'Shut down in {i}')
 		time.sleep(1)
 
-def update():
-	response = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/splib.py')
-	f = io.open('splib.py', mode="w", encoding="utf-8")
-	f.write(response.text)
-	f.close()
+def getUpdate():
+	response = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/update.py')
+	saveFile('update.py', response.text)
 
-def check_update():
+def check_getUpdate():
 	global version
-	print('Checking update...')
+	print('Checking getUpdate...')
 	response = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/version')
 	new_version = response.text[:4]
 	if(version != new_version):
 		os.system('cls')
-		cf = input(f'New Update! Version {new_version}\nDo you want update? [Y/N] ')
+		cf = input(f'New getUpdate! Version {new_version}\nDo you want getUpdate? [Y/N] ')
 		if (cf.isalpha()):
 			cf = cf.upper()
 		while(cf != 'Y' and cf != 'N'):
 			os.system('cls')
 			print("Invalid syntax! Try again.")
-			cf = input('New Update! Do you want update? [Y/N] ')
+			cf = input('New getUpdate! Do you want getUpdate? [Y/N] ')
 			if (cf.isalpha()):
 				cf = cf.upper()
 		if (cf == 'Y'):
 			os.system('cls')
 			print('Updating...')
-			update()
+			update.update_lib()
 			os.system('cls')
 			time.sleep(1)
-			shutDown('Updated!')
+			shutDown('getUpdated!')
 			return 'OK'
 
 def btn(x,li):
@@ -314,7 +334,7 @@ def btn(x,li):
 
 def _main():
 	select = ''
-	upd = check_update()
+	upd = check_getUpdate()
 	if upd == 'OK':
 		select = 'Q'
 	else:
