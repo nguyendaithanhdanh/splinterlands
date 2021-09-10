@@ -309,7 +309,7 @@ def check_update():
 		while(cf != 'Y' and cf != 'N'):
 			os.system('cls')
 			print("Invalid syntax! Try again.")
-			cf = input('New getUpdate! Do you want getUpdate? [Y/N] ')
+			cf = input('New update! Do you want update? [Y/N] ')
 			if (cf.isalpha()):
 				cf = cf.upper()
 		if (cf == 'Y'):
@@ -319,7 +319,7 @@ def check_update():
 			update.update_lib()
 			os.system('cls')
 			time.sleep(1)
-			shutDown('getUpdated!')
+			shutDown('Updated!')
 			return 'OK'
 
 def btn(x,li):
