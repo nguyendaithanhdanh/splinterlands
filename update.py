@@ -8,7 +8,7 @@ def saveFile(filePath, content):
 def update_lib():
 	os.mkdir('./data/lib')
 	obb = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/splib_beta.py')
-	saveFile('/data/lib/splib.py', obb)
+	saveFile('./data/lib/splib.py', obb)
 	data_team = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/team.json')
 	saveFile('./data/team.json')
 	os.remove('splib.py')
