@@ -296,6 +296,8 @@ def update():
 	saveFile('splib.py', splib.text)
 	upd = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/update.py')
 	saveFile('update.py', upd.text)
+	main = request.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/team_manage.py')
+	saveFile('team_manage.py', main.text)
 
 def check_update():
 	global version
