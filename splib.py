@@ -267,9 +267,10 @@ def menu():
 				select = select.upper()
 	return select
 
-def countDown():
+def shutDown(mess):
 	for i in range(3,0,-1):
 		os.system('cls')
+		print(mess)
 		print(f'Shut down in {i}')
 		time.sleep(1)
 
@@ -301,9 +302,8 @@ def check_update():
 			print('Updating...')
 			update()
 			os.system('cls')
-			print('Updated!')
 			time.sleep(1)
-			countDown()
+			shutDown('Updated!')
 			return 'OK'
 
 
@@ -320,7 +320,7 @@ def _main():
 	while (select != 'Q'):
 		os.system('cls')
 		if (select == '1'):
-			countDown()
+			shutDown()
 			select = menu()
 		elif (select == '2'):
 			n = addTeam()
