@@ -321,8 +321,6 @@ def check_update():
 			time.sleep(1)
 			shutDown('Updated!')
 			return 'OK'
-		else:
-			shutDown('This version is too old, please update to the latest version!')
 
 def btn(x,li):
 
