@@ -3,16 +3,16 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from bs4 import BeautifulSoup
-import getpass, time, io, json, random, os, requests
+import getpass, time, io, json, random, os, requests, update
 
 
-version = '0.23'
+version = '0.24'
 username = getpass.getuser()
 usr_path=('C:/Users/', username, '/AppData/Local/Google/Chrome/User Data')
 filePath = ''.join(usr_path)
-card_path = './data/card.json'
-team_path = './data/team.json'
-src_web_path = './data/source_web.html'
+card_path = '../card.json'
+team_path = '../team.json'
+src_web_path = '../source_web.html'
 
 with open(card_path) as json_file:
     card = json.load(json_file)
@@ -31,12 +31,13 @@ def initDriver():
 	}
 	chrome_options.add_experimental_option("prefs", prefs)
 	'''
-	driver = webdriver.Chrome('./data/webdriver/chromedriver', options = chrome_options)
+	driver = webdriver.Chrome('../webdriver/chromedriver', options = chrome_options)
 	driver.get('https://splinterlands.com/?p=battle_history') 
-	#time.sleep(5)
+	time.sleep(5)
 	#SELECT BATTLE MODE
 	driver.execute_script("var roww = document.getElementsByClassName('row')[1].innerHTML;var reg = /HOW TO PLAY|PRACTICE|CHALLENGE|RANKED/;var resultt = roww.match(reg);while(resultt != 'RANKED'){document.getElementsByClassName('slider_btn')[1].click();roww = document.getElementsByClassName('row')[1].innerHTML;resultt = roww.match(reg);};")
 	#BATTLE
+	time.sleep(5)
 	driver.execute_script("document.getElementsByClassName('big_category_btn red')[0].click();")
 	time.sleep(10)
 	#Create team
@@ -291,37 +292,35 @@ def shutDown(mess):
 		print(mess)
 		print(f'Shut down in {i}')
 		time.sleep(1)
-def update():
-	splib = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/splib.py')
-	saveFile('splib.py', splib.text)
-	upd = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/update.py')
-	saveFile('update.py', upd.text)
-	main = request.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/team_manage.py')
-	saveFile('team_manage.py', main.text)
+
+def getUpdate():
+	response = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/update.py')
+	saveFile('update.py', response.text)
 
 def check_update():
 	global version
-	print('Checking update...')
+	print('Checking Update...')
 	response = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/version')
 	new_version = response.text[:4]
 	if(version != new_version):
 		os.system('cls')
-		cf = input(f'New Update! Version {new_version}\nDo you want update? [Y/N] ')
+		cf = input(f'New Update! Version {new_version}\nDo you want Update? [Y/N] ')
 		if (cf.isalpha()):
 			cf = cf.upper()
 		while(cf != 'Y' and cf != 'N'):
 			os.system('cls')
 			print("Invalid syntax! Try again.")
-			cf = input('New Update! Do you want update? [Y/N] ')
+			cf = input('New getUpdate! Do you want getUpdate? [Y/N] ')
 			if (cf.isalpha()):
 				cf = cf.upper()
 		if (cf == 'Y'):
 			os.system('cls')
 			print('Updating...')
-			update()
+			getUpdate()
+			update.update_lib()
 			os.system('cls')
 			time.sleep(1)
-			shutDown('Updated!')
+			shutDown('getUpdated!')
 			return 'OK'
 
 def btn(x,li):
