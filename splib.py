@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 import getpass, time, io, json, random, os, requests, update
 
 
-version = '1.0'
+version = '1.1'
 username = getpass.getuser()
 usr_path=('C:/Users/', username, '/AppData/Local/Google/Chrome/User Data')
 filePath = ''.join(usr_path)
@@ -47,7 +47,7 @@ def pickranTeam(mana, card_path):
     p = random.randint(0,2)
     # Return color
     g_color = lst_color[p]
-    while(int(count_mana) <= int(mana) and len(list_name) < 6):
+    while(int(count_mana) <= int(mana) and len(list_name) <= 7):
         macrr = count_mana
         r = random.randrange(0, len(color[g_color]))
         name = color[g_color][r]
@@ -82,9 +82,12 @@ def battle():
     driver = webdriver.Chrome('./data/webdriver/chromedriver', options = chrome_options)
     wait = WebDriverWait(driver, 500)
     driver.get('https://splinterlands.com/?p=battle_history')
+    try:
+        WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH, "/html/body/div[3]/div/div/div/div[1]/div[1]")))
+        driver.execute_script("document.getElementsByClassName('modal-close-new')[0].click();")
+    except Exception as e:
+        pass
 
-    #BANER
-    #/html/body/div[3]/div/div/div/div[1]/div[1]
     '''
     #LOGIN
     driver.find_element_by_id('log_in_button').click()
@@ -96,7 +99,6 @@ def battle():
 
     for i in range(match):
         wait.until(EC.visibility_of_element_located((By.ID, "battle_category_btn")))
-
         driver.execute_script("var roww = document.getElementsByClassName('row')[1].innerHTML;var reg = /HOW TO PLAY|PRACTICE|CHALLENGE|RANKED/;var resultt = roww.match(reg);while(resultt != 'RANKED'){document.getElementsByClassName('slider_btn')[1].click();roww = document.getElementsByClassName('row')[1].innerHTML;resultt = roww.match(reg);};")
         time.sleep(1)
         status('Seeking Enemy...')
@@ -111,6 +113,7 @@ def battle():
         status('Creating team...')
         driver.execute_script("document.getElementsByClassName('btn btn--create-team')[0].click();")
         #Select card
+        time.sleep(5)
         wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="page_container"]/div/div[1]/div')))
         status('Picking card...')
 
@@ -128,15 +131,14 @@ def battle():
 
         #Skip
         status('Skiping')
-        #wait.until(EC.visibility_of_element_located((By.ID, '#btnSkip')))
+        #wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '#btnSkip')))
         driver.execute_script("document.getElementsByClassName('btn-battle')[1].click()")
 
         status('Done')
         wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="dialog_container"]/div/div/div/div[1]/h1')))
         driver.execute_script("document.getElementsByClassName('btn btn--done')[0].click();")
+    return 'Q'
 
-        input('Press any key to exit...')
-        return 'Q'
 
 
 def checkMana(add):
@@ -166,14 +168,14 @@ def menuOpt(select, team_adding):
     if (select.isdigit()):
         if(int(select) <= 0 or int(select) > 95):
             select = ''
-    list_options = ['S', 'C', 'Q', 'M']
+    list_options = ['S', 'C', 'Q', 'M', 'D']
     while (not btn(select, list_options) and (not select.isdigit())):
         os.system('cls')
         showListName()
         print("\n")
         print(f'Mana: [{checkMana(team_adding)}/{mana}]\n')
         showList(team_adding)
-        print("[S]ave\t\t[C]lear\t\t[M]ana\t\t[Q]uit edit team\n")
+        print("[S]ave\t\t[C]lear All\t\t[M]ana\t\t[D]elete\t\t[Q]uit edit team\n")
         print("Invalid syntax! Try again.")
         select = input('Select: ').upper()
         if (select.isdigit()):
@@ -259,7 +261,7 @@ def addTeam():
         print("\n")
         print(f'Mana: [{checkMana(team_adding)}/{mana}]\n')
         showList(team_adding)
-        print("[S]ave\t\t[C]lear\t\t[M]ana\t\t[Q]uit edit team\n")
+        print("[S]ave\t\t[C]lear All\t\t[M]ana\t\t[D]elete\t\t[Q]uit edit team\n")
         select = menuOpt(input('Select: '), team_adding)
 
         
@@ -285,17 +287,25 @@ def addTeam():
         elif (select == 'M'):
             os.system('cls')
             mana = inputMana()
+        elif (select == 'D'):
+            team_adding.pop(-1)
         print(team_adding)
     return select
-    
+
 def viewTeam():
     with open(team_path) as json_file:
         team = json.load(json_file)
     for i in team:
-        print(f'Mana: {i}')
+        print('|' + '_'*117 + '|')
+        print('|' + ' '*117 + '|')
+        print(f'{"|":<56}MANA {i}{" ":<55}|')
+        k = 1
         for j in team[i]:
-            print(j)
-        print()
+            p = ", ".join(j)
+            print(f'| {p:<116}|')
+            k += 1
+        print('|' + ' '*117 + '|')
+    print('|' + '_'*117 + '|')
 
 def showList(list):
     if (len(list) > 0):
