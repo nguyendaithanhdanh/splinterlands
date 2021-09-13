@@ -113,12 +113,10 @@ def battle():
         status('Creating team...')
         driver.execute_script("document.getElementsByClassName('btn btn--create-team')[0].click();")
         #Select card
-        time.sleep(5)
         wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="page_container"]/div/div[1]/div')))
         status('Picking card...')
-
         tm = listToString(team)
-        time.sleep(2)
+        time.sleep(7)
         driver.execute_script("var team = "+ tm + ";for (let i = 0; i < team.length; i++) {let card = document.getElementsByClassName('card beta');let cimg = document.getElementsByClassName('card-img');var reg = /[A-Z]\\w+(\\s[A-Z]\\w+)?/;for (let j = 0; j < card.length; j++){let att_card = card[j].innerText;let result = att_card.match(reg);let name = result[0];if (name == team[i]){cimg[j].click();break;}}}document.getElementsByClassName('btn-green')[0].click();")
 
 
