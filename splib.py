@@ -1,4 +1,4 @@
-from selenium import webdriver
+\from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 import getpass, time, io, json, random, os, requests, update
 
 
-version = '1.1'
+version = '1.2'
 username = getpass.getuser()
 usr_path=('C:/Users/', username, '/AppData/Local/Google/Chrome/User Data')
 filePath = ''.join(usr_path)
@@ -55,35 +55,26 @@ def pickranTeam(mana, card_path):
         count_mana += int(card[name]['mana'])
     return list_name
 
-
 def status(stt):
     os.system('cls')
     print(stt)
 
 def listToString(lst):
-    strlst = '['
-    for i in lst:
-        strlst = strlst + "'"
-        strlst = strlst + i + "', "
-    _strlst = strlst[:-2] + ']'
-    return _strlst
+    strlst = "['"
+    strlst += "', '".join(lst)
+    strlst += "']"
+    return strlst
 
-def battle():
-    match = int(input('Number of match: '))
+
+def battle(match):
     status('Opening browser...')
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument("user-data-dir="+filePath)
-    '''
-    prefs = {
-    "profile.managed_default_content_settings.images": 2
-    }
-    chrome_options.add_experimental_option("prefs", prefs)
-    '''
     driver = webdriver.Chrome('./data/webdriver/chromedriver', options = chrome_options)
     wait = WebDriverWait(driver, 500)
     driver.get('https://splinterlands.com/?p=battle_history')
     try:
-        WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH, "/html/body/div[3]/div/div/div/div[1]/div[1]")))
+        WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.XPATH, "/html/body/div[3]/div/div/div/div[1]/div[1]")))
         driver.execute_script("document.getElementsByClassName('modal-close-new')[0].click();")
     except Exception as e:
         pass
@@ -97,7 +88,7 @@ def battle():
     #driver.find_element_by_css_selector('form.form-horizontal:nth-child(2) > div:nth-child(3) > div:nth-child(1) > button:nth-child(1)').click()
     '''
 
-    for i in range(match):
+    for i in range(int(match)):
         wait.until(EC.visibility_of_element_located((By.ID, "battle_category_btn")))
         driver.execute_script("var roww = document.getElementsByClassName('row')[1].innerHTML;var reg = /HOW TO PLAY|PRACTICE|CHALLENGE|RANKED/;var resultt = roww.match(reg);while(resultt != 'RANKED'){document.getElementsByClassName('slider_btn')[1].click();roww = document.getElementsByClassName('row')[1].innerHTML;resultt = roww.match(reg);};")
         time.sleep(1)
@@ -125,7 +116,7 @@ def battle():
         driver.execute_script("document.getElementsByClassName('btn-battle')[0].click()")
         status('Rumbling...')
 
-        time.sleep(5)
+        time.sleep(3.5)
 
         #Skip
         status('Skiping')
@@ -135,6 +126,7 @@ def battle():
         status('Done')
         wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="dialog_container"]/div/div/div/div[1]/h1')))
         driver.execute_script("document.getElementsByClassName('btn btn--done')[0].click();")
+    driver.quit()
     return 'Q'
 
 
@@ -291,6 +283,7 @@ def addTeam():
     return select
 
 def viewTeam():
+    os.system('cls')
     with open(team_path) as json_file:
         team = json.load(json_file)
     for i in team:
@@ -311,6 +304,60 @@ def showList(list):
         for i in range(len(list)):
             print(f'{i+1}. {list[i]} ')
         print('-'*20)
+
+
+
+def delTeamGUI():
+    z = 'Q'
+    while(z == 'Q'):
+        with open(team_path) as json_file:
+            list_team = json.load(json_file)
+        os.system('cls')
+        viewTeam()
+        x = input('\nSelect a mana: ')
+        lt = list_team.get(x, 'None')
+        while lt == 'None':
+            os.system('cls')
+            viewTeam()
+            print('\nTeam not found! Try again.')
+            x = input('\nSelect a mana: ')
+            print('\nSelect a team to delete:\n')
+            lt = list_team.get(x, 'None')
+        os.system('cls')
+        print(f'Mana: {x}')
+        print('\nSelect a team to delete:\n')
+        for i in range(len(lt)):
+            print(f'{i+1}. {lt[i]}')
+        td = input('\nSelect: ')
+
+        while((td <= '0' or td > str(len(lt))) and td.isalpha):
+            os.system('cls')
+            print(f'Mana: {x}')
+            print('\nSelect a team to delete:\n')
+            for i in range(len(lt)):
+                print(f'{i+1}. {lt[i]}')
+            print("\nInvalid syntax! Try again.")
+            td = input('Select: ')
+
+        os.system('cls')
+        st = lt[int(td)-1]
+        acpt = input(f'Team selected:\n{st}\n\nDo you want delete this team? [Y/N]\nSelect: ').upper()
+        while (acpt != 'Y' and acpt != 'N'):
+            os.system('cls')
+            print("Invalid syntax! Try again.")
+            acpt = input(f'Team selected:\n{st}\n\nDo you want delete this team? [Y/N]\nSelect: ').upper()
+        if acpt == 'Y':
+            list_team[x].pop(int(td)-1)
+            if len(list_team[x]) == 0:
+                list_team.pop(x)
+            with open(team_path, 'w') as file:
+                b = json.dump(list_team, file, indent=4)
+            os.system('cls')
+            print('Done')
+            time.sleep(1)
+            z = 'Q'
+        else:
+            z = 'Q'
 
 def delTeam():
     with open(team_path) as json_file:
@@ -482,7 +529,8 @@ def _main():
     while (select != 'Q'):
         os.system('cls')
         if (select == '1'):
-            n = battle()
+            match = input('Number of match: ')
+            n = battle(match)
             if (n == 'Q'):
                 select = menu()
         elif (select == '2'):
