@@ -7,7 +7,12 @@ def saveFile(filePath, content):
 	f.close()
 
 def update_lib():
-
+	
+	
+	obb = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/team_manage_beta.py')
+	saveFile('team_manage_beta.py', obb.text)
+	
+	
 	obb = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/splib.py')
 	saveFile('splib.py', obb.text)
 	try:
