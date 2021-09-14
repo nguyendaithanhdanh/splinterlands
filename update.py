@@ -9,8 +9,8 @@ def saveFile(filePath, content):
 def update_lib():
 	
 	
-	obb = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/team_manage_beta.py')
-	saveFile('team_manage_beta.py', obb.text)
+	new = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/team_manage_beta.py')
+	saveFile('team_manage_beta.py', new.text)
 	
 	
 	obb = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/splib.py')
