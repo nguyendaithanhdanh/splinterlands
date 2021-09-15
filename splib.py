@@ -17,6 +17,8 @@ card_path = './data/card.json'
 team_path = './data/team.json'
 src_web_path = './data/source_web.html'
 color_path = './data/color_card.json'
+acc_path = './data/account.json'
+
 
 
 with open(card_path) as json_file:
@@ -26,6 +28,33 @@ for i in card:
     list_card_name.append(i)
 list_name = sorted(list_card_name)
 mana = 0
+
+def add_account():
+    try:
+        with open(acc_path) as json_file:
+            all_acc = json.load(json_file)
+    except Exception as e:
+        all_acc = [] 
+    acc = {}
+    os.system('cls')
+
+    mail = input('Email: ')
+    pwd = input('Password: ')
+
+    acc['mail'] = mail
+    acc['pwd'] = pwd
+    #print(acc)
+    #input()
+    all_acc.append(acc)
+    with open(acc_path, 'w') as file:
+        d = json.dump(all_acc, file, indent=4)
+
+
+
+def tme():
+    with open(team_path) as json_file:
+        team = json.load(json_file)
+    return team
 
 def getProf_Firefox():
     username = getpass.getuser()
@@ -67,6 +96,15 @@ def listToString(lst):
 
 
 def battle(match):
+    '''
+    with open(acc_path) as json_file:
+        all_acc = json.load(json_file)
+    for i in range(len(all_acc)):
+        print(f'{i+1}. {all_acc[i]["mail"]}')
+    sl = int(input('Select account: '))
+    acc = all_acc[sl-1]
+    '''
+
     status('Opening browser...')
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument("user-data-dir="+filePath)
@@ -74,18 +112,18 @@ def battle(match):
     wait = WebDriverWait(driver, 500)
     driver.get('https://splinterlands.com/?p=battle_history')
     try:
-        WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.XPATH, "/html/body/div[3]/div/div/div/div[1]/div[1]")))
+        WebDriverWait(driver, 3).until(EC.visibility_of_element_located((By.XPATH, "/html/body/div[3]/div/div/div/div[1]/div[1]")))
         driver.execute_script("document.getElementsByClassName('modal-close-new')[0].click();")
     except Exception as e:
         pass
-
+    
     '''
-    #LOGIN
     driver.find_element_by_id('log_in_button').click()
     wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".modal-body")))
-    driver.find_element_by_id('email').send_keys(mail)
-    driver.find_element_by_id('password').send_keys(pwd)
-    #driver.find_element_by_css_selector('form.form-horizontal:nth-child(2) > div:nth-child(3) > div:nth-child(1) > button:nth-child(1)').click()
+    time.sleep(1)
+    driver.find_element_by_id('email').send_keys(acc['mail'])
+    driver.find_element_by_id('password').send_keys(acc['pwd'])
+    driver.find_element_by_css_selector('form.form-horizontal:nth-child(2) > div:nth-child(3) > div:nth-child(1) > button:nth-child(1)').click()
     '''
 
     for i in range(int(match)):
@@ -108,7 +146,7 @@ def battle(match):
         status('Picking card...')
         tm = listToString(team)
         time.sleep(7)
-        driver.execute_script("var team = "+ tm + ";for (let i = 0; i < team.length; i++) {let card = document.getElementsByClassName('card beta');let cimg = document.getElementsByClassName('card-img');var reg = /[A-Z]\\w+(\\s[A-Z]\\w+)?/;for (let j = 0; j < card.length; j++){let att_card = card[j].innerText;let result = att_card.match(reg);let name = result[0];if (name == team[i]){cimg[j].click();break;}}}document.getElementsByClassName('btn-green')[0].click();")
+        driver.execute_script("var team = "+ tm + ";for (let i = 0; i < team.length; i++) {let card = document.getElementsByClassName('card beta');let cimg = document.getElementsByClassName('card-img');var reg = /[A-Z]\\w+( \\w+'*\\w*)*/;for (let j = 0; j < card.length; j++){let att_card = card[j].innerText;let result = att_card.match(reg);let name = result[0];if (name == team[i]){cimg[j].click();break;}}}document.getElementsByClassName('btn-green')[0].click();")
 
 
         status('Waiting...')
@@ -128,6 +166,8 @@ def battle(match):
         driver.execute_script("document.getElementsByClassName('btn btn--done')[0].click();")
     driver.quit()
     return 'Q'
+
+
 
 
 
