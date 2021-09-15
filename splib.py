@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 import getpass, time, io, json, random, os, requests, update
 
 
-version = '1.2'
+version = '1.3'
 username = getpass.getuser()
 usr_path=('C:/Users/', username, '/AppData/Local/Google/Chrome/User Data')
 filePath = ''.join(usr_path)
