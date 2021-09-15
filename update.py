@@ -1,6 +1,6 @@
 import requests, io, os, shutil
 
-#Update for 1.2
+#Update for 1.3
 def saveFile(filePath, content):
 	f = io.open(filePath, mode="w", encoding="utf-8")
 	f.write(content)
@@ -8,14 +8,5 @@ def saveFile(filePath, content):
 
 def update_lib():
 	
-	
-	new = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/team_manage_beta.py')
-	saveFile('team_manage_beta.py', new.text)
-	
-	
 	obb = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/splib.py')
 	saveFile('splib.py', obb.text)
-	try:
-		import PyQt5
-	except Exception as e:
-		os.system('pip install PyQt5')
