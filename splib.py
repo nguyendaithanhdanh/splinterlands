@@ -520,7 +520,7 @@ def viewTeam():
             print(f'{k}. {p}')
             print(f'   --> Won: {kp[0]}  /  Lost: {kp[1]}  /  Drawn: {kp[2]} | in {kp[3]} match | Win rate {percent}%')
             k += 1
-        print()
+            print()
     print('_'*120)
     print()
 
@@ -746,7 +746,7 @@ def btn(x,li):
             break   
     return check        
 
-def _main():
+def main():
     select = ''
     upd = check_update()
     if upd == 'OK':
