@@ -213,13 +213,12 @@ def battle(match):
             time.sleep(5)
             writeHistory(driver, his_path, 20)
             check_point = vf
-
         driver.execute_script("var roww = document.getElementsByClassName('row')[1].innerHTML;var reg = /HOW TO PLAY|PRACTICE|CHALLENGE|RANKED/;var resultt = roww.match(reg);while(resultt != 'RANKED'){document.getElementsByClassName('slider_btn')[1].click();roww = document.getElementsByClassName('row')[1].innerHTML;resultt = roww.match(reg);};")
         time.sleep(1)
         status('Seeking Enemy...')
         driver.execute_script("document.getElementsByClassName('big_category_btn red')[0].click();")
         wait.until(EC.visibility_of_element_located((By.XPATH, "/html/body/div[3]/div/div/div/div[2]/div[3]/div[2]/button")))
-        time.sleep(1)
+        time.sleep(1.5)
         mana = driver.find_element_by_css_selector('div.col-md-3:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1)').text
         team = pickTeam(mana)
         if team == 'None':
@@ -232,8 +231,11 @@ def battle(match):
         status('Picking card...')
         tm = listToString(team)
         time.sleep(7)
-        driver.execute_script("var team = "+ tm + ";for (let i = 0; i < team.length; i++) {let card = document.getElementsByClassName('card beta');let cimg = document.getElementsByClassName('card-img');var reg = /[A-Z]\\w+( \\w+'*\\w*)*/;for (let j = 0; j < card.length; j++){let att_card = card[j].innerText;let result = att_card.match(reg);let name = result[0];if (name == team[i]){cimg[j].click();break;}}}document.getElementsByClassName('btn-green')[0].click();")
-
+        try:
+            driver.execute_script("var team = "+ tm + ";for (let i = 0; i < team.length; i++) {let card = document.getElementsByClassName('card beta');let cimg = document.getElementsByClassName('card-img');var reg = /[A-Z]\\w+( \\w+'*\\w*)*/;for (let j = 0; j < card.length; j++){let att_card = card[j].innerText;let result = att_card.match(reg);let name = result[0];if (name == team[i]){cimg[j].click();break;}}}document.getElementsByClassName('btn-green')[0].click();")
+        except Exception as e:
+            time.sleep(3)
+            driver.execute_script("var team = "+ tm + ";for (let i = 0; i < team.length; i++) {let card = document.getElementsByClassName('card beta');let cimg = document.getElementsByClassName('card-img');var reg = /[A-Z]\\w+( \\w+'*\\w*)*/;for (let j = 0; j < card.length; j++){let att_card = card[j].innerText;let result = att_card.match(reg);let name = result[0];if (name == team[i]){cimg[j].click();break;}}}document.getElementsByClassName('btn-green')[0].click();")            
         try:
             status('Waiting...')
             WebDriverWait(driver, 150).until(EC.visibility_of_element_located((By.CSS_SELECTOR, '#btnRumble')))
@@ -475,7 +477,7 @@ def analys(his_path, team_path):
         print(f"\nIn {kp[3]} match:")
         print(f'    Won: {kp[0]}')
         print(f'    Lost: {kp[1]}')
-        print(f'    Draw: {kp[2]}')
+        print(f'    Drawn: {kp[2]}')
         
         if kp[3] != 0:
             print('\n\t\t\t\t\t\tHISTORY ENEMY TEAM\n')
@@ -516,7 +518,7 @@ def viewTeam():
         k = 1
         for j in team[i]:
             kp = kpi(his_path, i, j)
-            percent = 0
+            percent = 0.0
             if kp[3] != 0:
                 percent = int(kp[0]) / int(kp[3]) *100
             p = ", ".join(j)
