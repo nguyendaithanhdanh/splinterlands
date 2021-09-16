@@ -5,10 +5,10 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.expected_conditions import presence_of_element_located
 from bs4 import BeautifulSoup
-import getpass, time, io, json, random, os, requests, update
+import getpass, time, io, json, random, os, requests, update, re
 
 
-version = '1.3'
+version = '1.4'
 username = getpass.getuser()
 usr_path=('C:/Users/', username, '/AppData/Local/Google/Chrome/User Data')
 filePath = ''.join(usr_path)
@@ -18,6 +18,7 @@ team_path = './data/team.json'
 src_web_path = './data/source_web.html'
 color_path = './data/color_card.json'
 acc_path = './data/account.json'
+his_path = './data/history.json'
 
 
 
@@ -88,6 +89,79 @@ def status(stt):
     os.system('cls')
     print(stt)
 
+
+def writeHistory(driver, his_path, times):
+    soup = BeautifulSoup(driver.page_source, 'html.parser')
+    rlt_soup = soup.find_all(class_="battle-log-entry")
+    for n in range(times):
+        try:
+            with open(his_path) as json_file:
+                history = json.load(json_file)
+                json_file.close()
+        except Exception as e:
+            history = {}
+        btl_log=re.compile(r'\d+|\w+\s?\w*\s?\w*\s?\w*[^(\n)]').findall(rlt_soup[n].text)
+        me = []
+        enemy = []
+        for i in range(3,len(btl_log)):
+            if btl_log[i] !='VS':
+                me.append(btl_log[i])
+            else:
+                break
+        en_name = ''
+        en_rat = ''
+        en_gui = ''
+
+        for j in range(len(btl_log)-3, -1, -1):
+            if btl_log[j].isdigit():
+                en_name = btl_log[j+1]
+                en_rat = btl_log[j]
+                en_gui = btl_log[j+2]
+                for z in range(j+3, len(btl_log)-3):
+                    enemy.append(btl_log[z])
+                break
+
+        result = btl_log[len(me)+4]
+        mode = btl_log[-3]
+        mana=btl_log[len(me)+7]
+        if mana == '0':
+            mana=btl_log[len(me)+9]
+        if mana == 'DEC':
+            mana=btl_log[len(me)+10]
+            
+        my_team = {}
+        my_team['name'] = btl_log[1]
+        my_team['rating'] = btl_log[0]
+        my_team['guid_name'] = btl_log[2]
+        my_team['team'] = me
+
+        enemy_team = {}
+        enemy_team['name'] = en_name
+        enemy_team['rating'] = en_rat
+        enemy_team['guid_name'] = en_gui
+        enemy_team['team'] = enemy
+
+
+        result_ = result[:-3]
+        if result[:-3] != "Battle Lost" and result[:-3] != "Battle Won":
+            result_ = 'Draw'
+
+        match = {}
+        match['mode'] = mode[:-4]
+        match['result'] = result_
+        match['my_team'] = my_team
+        match['enemy_team'] = enemy_team
+
+        if history.get(mana, 'Non') == 'Non':
+            history[mana] = []
+            history[mana].append(match)
+        else:
+            history[mana].append(match)
+        with open(his_path, 'w') as file:
+            d = json.dump(history, file, indent=4)
+            file.close()
+
+
 def listToString(lst):
     strlst = "['"
     strlst += "', '".join(lst)
@@ -96,6 +170,7 @@ def listToString(lst):
 
 
 def battle(match):
+    
     '''
     with open(acc_path) as json_file:
         all_acc = json.load(json_file)
@@ -104,6 +179,7 @@ def battle(match):
     sl = int(input('Select account: '))
     acc = all_acc[sl-1]
     '''
+    
 
     status('Opening browser...')
     chrome_options = webdriver.ChromeOptions()
@@ -125,9 +201,19 @@ def battle(match):
     driver.find_element_by_id('password').send_keys(acc['pwd'])
     driver.find_element_by_css_selector('form.form-horizontal:nth-child(2) > div:nth-child(3) > div:nth-child(1) > button:nth-child(1)').click()
     '''
+    
 
+    check_point = 0
+    clone_i = 0
     for i in range(int(match)):
+        clone_i = i+1
         wait.until(EC.visibility_of_element_located((By.ID, "battle_category_btn")))
+        vf = i+1
+        if vf % 20 == 0:
+            time.sleep(5)
+            writeHistory(driver, his_path, 20)
+            check_point = vf
+
         driver.execute_script("var roww = document.getElementsByClassName('row')[1].innerHTML;var reg = /HOW TO PLAY|PRACTICE|CHALLENGE|RANKED/;var resultt = roww.match(reg);while(resultt != 'RANKED'){document.getElementsByClassName('slider_btn')[1].click();roww = document.getElementsByClassName('row')[1].innerHTML;resultt = roww.match(reg);};")
         time.sleep(1)
         status('Seeking Enemy...')
@@ -148,22 +234,28 @@ def battle(match):
         time.sleep(7)
         driver.execute_script("var team = "+ tm + ";for (let i = 0; i < team.length; i++) {let card = document.getElementsByClassName('card beta');let cimg = document.getElementsByClassName('card-img');var reg = /[A-Z]\\w+( \\w+'*\\w*)*/;for (let j = 0; j < card.length; j++){let att_card = card[j].innerText;let result = att_card.match(reg);let name = result[0];if (name == team[i]){cimg[j].click();break;}}}document.getElementsByClassName('btn-green')[0].click();")
 
+        try:
+            status('Waiting...')
+            WebDriverWait(driver, 150).until(EC.visibility_of_element_located((By.CSS_SELECTOR, '#btnRumble')))
+            driver.execute_script("document.getElementsByClassName('btn-battle')[0].click()")
+            status('Rumbling...')
+            time.sleep(3.5)
+            status('Skiping')
+            #wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '#btnSkip')))
+            driver.execute_script("document.getElementsByClassName('btn-battle')[1].click()")
+        except Exception as e:
+            status('Done')
+            wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="dialog_container"]/div/div/div/div[1]/h1')))
+            driver.execute_script("document.getElementsByClassName('btn btn--done')[0].click();")
 
-        status('Waiting...')
-        wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '#btnRumble')))
-        driver.execute_script("document.getElementsByClassName('btn-battle')[0].click()")
-        status('Rumbling...')
-
-        time.sleep(3.5)
-
-        #Skip
-        status('Skiping')
-        #wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '#btnSkip')))
-        driver.execute_script("document.getElementsByClassName('btn-battle')[1].click()")
-
-        status('Done')
+        
         wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="dialog_container"]/div/div/div/div[1]/h1')))
         driver.execute_script("document.getElementsByClassName('btn btn--done')[0].click();")
+        status('Done')
+    time.sleep(5)
+    times_when_smaller_20 = clone_i - check_point
+    if times_when_smaller_20 > 0:
+        writeHistory(driver, his_path, times_when_smaller_20)
     driver.quit()
     return 'Q'
 
@@ -219,7 +311,7 @@ def menuOpt(select, team_adding):
             time.sleep(1)
         else:
             os.system('cls')
-            print('Team was saved!')
+            print('Team have been saved!')
             '''
             notifi = input('Do you want continue? [Y/N] ').upper()
             while (notifi != 'Y' and notifi != 'N'):
@@ -322,21 +414,119 @@ def addTeam():
         print(team_adding)
     return select
 
+def list_name_dict():
+    lname = {}
+    for i in range(1, len(list_name)+1):
+        lname[list_name[i-1]] = str(i)
+    return lname 
+
+
+def kpi(his_path, mana, team):
+    with open(his_path) as json_file:
+        history = json.load(json_file)
+    won = 0
+    lost = 0
+    drawn = 0
+    match = 0
+    if history.get(mana, 'None') != 'None':
+        for i in range(len(history[mana])):
+            if history[mana][i]['my_team']['team'] == team:
+                if history[mana][i]['result'] == 'Battle Won':
+                    won += 1
+                if history[mana][i]['result'] == 'Battle Lost':
+                    lost += 1
+                if history[mana][i]['result'] == 'Drawn':
+                    drawn += 1
+        match = won + lost + drawn
+    return [won, lost, drawn, match]
+
+
+def analys(his_path, team_path):
+    with open(his_path) as json_file:
+        history = json.load(json_file)
+    with open(team_path) as json_file:
+        team = json.load(json_file)
+    print('\n[Q]uit\n')
+    mana = input('Enter mana to view details: ').upper()
+    while((team.get(mana, 'Non') == 'Non') and mana != 'Q'):
+        print('[!] Mana is not available!')
+        time.sleep(1)
+        os.system('cls')
+        viewTeam()
+        print('\n[Q]uit\n')
+        mana = input('Enter mana to view details: ').upper()
+    if mana == 'Q':
+        return 'Q'
+    else:
+        os.system('cls')
+        print(f' Mana {mana}:\n')
+        j = 1
+        for i in team[mana]:
+             print(f'{j}. {i}')
+             j += 1
+        te = int(input('Select team: '))
+        te -=1
+        b = team[mana][te]
+
+        kp = kpi(his_path, mana, b)
+
+        os.system('cls')
+        print(f'Team: {b}')
+        print(f"\nIn {kp[3]} match:")
+        print(f'    Won: {kp[0]}')
+        print(f'    Lost: {kp[1]}')
+        print(f'    Draw: {kp[2]}')
+        
+        if kp[3] != 0:
+            print('\n\t\t\t\t\t\tHISTORY ENEMY TEAM\n')
+            for i in range(len(history[mana])):
+                if history[mana][i]['my_team']['team'] == b:
+                    rsl = history[mana][i]['result']
+                    x = rsl[7:]
+                    if x != 'Won' and x!='Lost':
+                        x = "Drawn"
+                    print(f'> {x:<4}', end=": ")
+                    print('[', end="")
+                    print(", ".join(history[mana][i]['enemy_team']['team']), end="")
+                    print(']')
+                    xx = []
+                    pp = list_name_dict()
+                    for k in history[mana][i]['enemy_team']['team']:
+                        xx.append(pp.get(k))
+                    num = " / ".join(xx)
+                    print(f'Number [{num}]')
+        n = input('\n[Q]uit\t[R]eturn View team\nSelect: ').upper()
+        while(n!='R' and n!='Q'):
+            os.system('cls')
+            print('Invalid syntax!')
+            n = input('\n[Q]uit\t[R]eturn View team\nSelect: ').upper()
+        if n == 'R':
+            return 'R'
+        else:
+            return 'Q'
+
+
 def viewTeam():
     os.system('cls')
     with open(team_path) as json_file:
         team = json.load(json_file)
     for i in team:
-        print('|' + '_'*117 + '|')
-        print('|' + ' '*117 + '|')
-        print(f'{"|":<56}MANA {i}{" ":<55}|')
+        print('_'*120)
+        print(f'\n MANA {i}:')
         k = 1
         for j in team[i]:
+            kp = kpi(his_path, i, j)
+            percent = 0
+            if kp[3] != 0:
+                percent = int(kp[0]) / int(kp[3]) *100
             p = ", ".join(j)
-            print(f'| {p:<116}|')
+            print(f'{k}. {p}')
+            print(f'   --> Won: {kp[0]}  /  Lost: {kp[1]}  /  Drawn: {kp[2]} | in {kp[3]} match | Win rate {percent}%')
             k += 1
-        print('|' + ' '*117 + '|')
-    print('|' + '_'*117 + '|')
+        print()
+    print('_'*120)
+    print()
+
 
 def showList(list):
     if (len(list) > 0):
@@ -579,9 +769,12 @@ def _main():
                 select = menu()
         elif (select == '3'):
             viewTeam()
-            n = input('\n[Q]uit?\nSelect: ').upper()
+            n = analys(his_path, team_path)
+            #
             if (n == 'Q'):
                 select = menu()
+            elif (n== 'R'):
+                select == '3'
         elif (select == '4'):
             n = delTeam()
             if (n == 'Q'):
