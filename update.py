@@ -8,5 +8,8 @@ def saveFile(filePath, content):
 
 def update_lib():
 	
-	obb = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/splib.py')
-	saveFile('splib.py', obb.text)
+	splib = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/splib.py')
+	saveFile('splib.py', splib.text)
+	
+	history = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/master/history.json')
+	saveFile('./data/history.json', history.text)
