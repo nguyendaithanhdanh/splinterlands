@@ -5,7 +5,10 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.expected_conditions import presence_of_element_located
 from bs4 import BeautifulSoup
+import multiprocessing
+#from selenium.webdriver.remote.command import Command
 import getpass, time, io, json, random, os, requests, update, re
+import pickle
 
 
 version = '1.6'
@@ -19,6 +22,8 @@ src_web_path = './data/source_web.html'
 color_path = './data/color_card.json'
 acc_path = './data/account.json'
 his_path = './data/history.json'
+
+
 
 
 
@@ -51,11 +56,11 @@ def add_account():
         d = json.dump(all_acc, file, indent=4)
 
 
-
 def tme():
     with open(team_path) as json_file:
         team = json.load(json_file)
     return team
+
 
 def getProf_Firefox():
     username = getpass.getuser()
@@ -144,7 +149,7 @@ def writeHistory(driver, his_path, times):
 
         result_ = result[:-3]
         if result[:-3] != "Battle Lost" and result[:-3] != "Battle Won":
-            result_ = 'Draw'
+            result_ = 'Drawn'
 
         match = {}
         match['mode'] = mode[:-4]
@@ -169,40 +174,36 @@ def listToString(lst):
     return strlst
 
 
-def battle(match):
-    
-    '''
-    with open(acc_path) as json_file:
-        all_acc = json.load(json_file)
-    for i in range(len(all_acc)):
-        print(f'{i+1}. {all_acc[i]["mail"]}')
-    sl = int(input('Select account: '))
-    acc = all_acc[sl-1]
-    '''
+def battle(match, acc):
     
 
     status('Opening browser...')
     chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument("user-data-dir="+filePath)
+    #chrome_options.add_argument("user-data-dir="+filePath)
     driver = webdriver.Chrome('./data/webdriver/chromedriver', options = chrome_options)
     wait = WebDriverWait(driver, 500)
+
     driver.get('https://splinterlands.com/?p=battle_history')
-    try:
-        WebDriverWait(driver, 3).until(EC.visibility_of_element_located((By.XPATH, "/html/body/div[3]/div/div/div/div[1]/div[1]")))
-        driver.execute_script("document.getElementsByClassName('modal-close-new')[0].click();")
-    except Exception as e:
-        pass
-    
-    '''
     driver.find_element_by_id('log_in_button').click()
     wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".modal-body")))
     time.sleep(1)
     driver.find_element_by_id('email').send_keys(acc['mail'])
     driver.find_element_by_id('password').send_keys(acc['pwd'])
     driver.find_element_by_css_selector('form.form-horizontal:nth-child(2) > div:nth-child(3) > div:nth-child(1) > button:nth-child(1)').click()
-    '''
-    
 
+    try:
+        WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.XPATH, '//*[@id="dialog_container"]/div/div/div/div[2]/div[2]/div')))
+        driver.execute_script("document.getElementsByClassName('close')[0].click();")
+    except Exception as e:
+        pass
+    driver.get('https://splinterlands.com/?p=battle_history')
+
+
+    try:
+        WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.XPATH, "/html/body/div[3]/div/div/div/div[1]/div[1]")))
+        driver.execute_script("document.getElementsByClassName('modal-close-new')[0].click();")
+    except Exception as e:
+        pass
     check_point = 0
     clone_i = 0
     for i in range(int(match)):
@@ -210,7 +211,7 @@ def battle(match):
         wait.until(EC.visibility_of_element_located((By.ID, "battle_category_btn")))
         vf = i+1
         if vf % 5 == 0:
-            time.sleep(5)
+            time.sleep(3)
             writeHistory(driver, his_path, 20)
             check_point = vf
         driver.execute_script("var roww = document.getElementsByClassName('row')[1].innerHTML;var reg = /HOW TO PLAY|PRACTICE|CHALLENGE|RANKED/;var resultt = roww.match(reg);while(resultt != 'RANKED'){document.getElementsByClassName('slider_btn')[1].click();roww = document.getElementsByClassName('row')[1].innerHTML;resultt = roww.match(reg);};")
@@ -250,7 +251,7 @@ def battle(match):
         wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="dialog_container"]/div/div/div/div[1]/h1')))
         driver.execute_script("document.getElementsByClassName('btn btn--done')[0].click();")
         status('Done')
-    time.sleep(5)
+    time.sleep(3) 
     times_when_smaller_20 = clone_i - check_point
     if times_when_smaller_20 > 0:
         writeHistory(driver, his_path, times_when_smaller_20)
@@ -258,7 +259,16 @@ def battle(match):
     return 'Q'
 
 
-
+def multiBattle():
+    with open(acc_path) as json_file:
+        acc = json.load(json_file)
+    p1 = multiprocessing.Process(target=battle, args=('1', acc[0]))
+    p2 = multiprocessing.Process(target=battle, args=('2', acc[1]))
+    p1.start()
+    p2.start()
+    p1.join()
+    p2.join()
+    return 'Q'
 
 def checkMana(add):
     mana = 0
@@ -407,7 +417,8 @@ def addTeam():
             os.system('cls')
             mana = inputMana()
         elif (select == 'D'):
-            team_adding.pop(-1)
+            if len(team_adding) > 0:
+                team_adding.pop(-1)
         print(team_adding)
     return select
 
@@ -498,7 +509,7 @@ def analys(his_path, team_path):
                     xx = []
                     pp = list_name_dict()
                     for k in history[mana][i]['enemy_team']['team']:
-                        xx.append(pp.get(k))
+                        xx.append(str(pp.get(k)))
                     num = " / ".join(xx)
                     print(f'Number [{num}]')
         n = input('\n[Q]uit\t[R]eturn View team\nSelect: ').upper()
@@ -510,6 +521,7 @@ def analys(his_path, team_path):
             return 'R'
         else:
             return 'Q'
+
 
 def viewTeam():
     os.system('cls')
@@ -686,20 +698,18 @@ logo = '''
 
 def menu():
     os.system('cls')
-    #print('\t****TEAM MANAGE****')
     print(logo)
     print(f"\t\t\t\t\t\t    Version {version}")
-    print('\n1. START GAME\n2. Add team\n3. View team\n4. Delete team\n\n[Q]uit')
+    print('\n1. START GAME\n2. Add team\n3. View team\n4. Delete team\n5. Multiaccount\n\n[Q]uit')
     select = input('\nSelect: ')
     if select.isalpha():
         select = select.upper()
-    list_op = ['1', '2', '3','4', 'Q']
+    list_op = ['1', '2', '3','4', '5', 'Q']
     while (not btn(select, list_op)):
         os.system('cls')
-        #print('\t****TEAM MANAGE****')
         print(logo)
         print(f"\t\t\t\t\t\t    Version {version}")
-        print('\n1. START GAME\n2. Add team\n3. View team\n4. Delete team\n\n[Q]uit')
+        print('\n1. START GAME\n2. Add team\n3. View team\n4. Delete team\n5. Multiaccount\n\n[Q]uit')
         print("Invalid syntax! Try again.")
         select = input('\nSelect: ')
         if select.isalpha():
@@ -765,7 +775,9 @@ def main():
         os.system('cls')
         if (select == '1'):
             match = input('Number of match: ')
-            n = battle(match)
+            with open(acc_path) as json_file:
+                acc = json.load(json_file)
+            n = battle(match, acc[0])
             if (n == 'Q'):
                 select = menu()
         elif (select == '2'):
@@ -784,4 +796,10 @@ def main():
             n = delTeam()
             if (n == 'Q'):
                 select = menu()
+        elif (select == '5'):
+            n = multiBattle()
+            if (n == 'Q'):
+                select = menu()
     os.system('cls')
+
+#add_account()
