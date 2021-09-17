@@ -1,4 +1,4 @@
-from splib import _main
+from splib import main
 
 if __name__== "__main__":
-	_main()
+	main()
