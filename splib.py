@@ -5,22 +5,21 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.expected_conditions import presence_of_element_located
 from bs4 import BeautifulSoup
+import multiprocessing
+#from selenium.webdriver.remote.command import Command
 import getpass, time, io, json, random, os, requests, update, re
+import pickle
 
-
-version = '1.6'
+version = '1.7'
 username = getpass.getuser()
 usr_path=('C:/Users/', username, '/AppData/Local/Google/Chrome/User Data')
 filePath = ''.join(usr_path)
-
 card_path = './data/card.json'
 team_path = './data/team.json'
 src_web_path = './data/source_web.html'
 color_path = './data/color_card.json'
 acc_path = './data/account.json'
 his_path = './data/history.json'
-
-
 
 with open(card_path) as json_file:
     card = json.load(json_file)
@@ -49,13 +48,60 @@ def add_account():
     all_acc.append(acc)
     with open(acc_path, 'w') as file:
         d = json.dump(all_acc, file, indent=4)
+    account_manage()
 
+def del_account():
+    os.system('cls')
+    with open(acc_path) as json_file:
+        all_acc = json.load(json_file)
+        json_file.close()
+    j = 1
+    for i in all_acc:
+        print(f'{j}. {i["mail"]}')
+        j += 1
+    n = int(input('Select account to delete: '))
+    all_acc.pop(n-1)
+    with open(acc_path, 'w') as file:
+        d = json.dump(all_acc, file, indent=4)
+        file.close()
+    account_manage()
+
+def select_account():
+    with open(acc_path) as json_file:
+        all_acc = json.load(json_file)
+        json_file.close()
+    j = 1
+    for i in all_acc:
+        print(f'{j}. {i["mail"]}')
+        j += 1
+    n = int(input('Select account: '))
+    return all_acc[n-1]
+
+def account_manage():
+    os.system('cls')
+    with open(acc_path) as json_file:
+        all_acc = json.load(json_file)
+        json_file.close()
+    j = 1
+    for i in all_acc:
+        print(f'{j}. {i["mail"]}')
+        j += 1
+    print("\n[A]dd\t\t[D]elete\t\t[Q]uit")
+    n = input('Select: ').upper()
+    if n == 'A':
+        add_account()
+    elif n == 'D':
+        del_account()
+    elif n == 'Q':
+        return 'Q'
+    return 'Q'
 
 
 def tme():
     with open(team_path) as json_file:
         team = json.load(json_file)
     return team
+
 
 def getProf_Firefox():
     username = getpass.getuser()
@@ -169,40 +215,34 @@ def listToString(lst):
     return strlst
 
 
-def battle(match):
-    
-    '''
-    with open(acc_path) as json_file:
-        all_acc = json.load(json_file)
-    for i in range(len(all_acc)):
-        print(f'{i+1}. {all_acc[i]["mail"]}')
-    sl = int(input('Select account: '))
-    acc = all_acc[sl-1]
-    '''
-    
-
+def battle(match, acc):
     status('Opening browser...')
     chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument("user-data-dir="+filePath)
+    #chrome_options.add_argument("user-data-dir="+filePath)
     driver = webdriver.Chrome('./data/webdriver/chromedriver', options = chrome_options)
     wait = WebDriverWait(driver, 500)
+
     driver.get('https://splinterlands.com/?p=battle_history')
-    try:
-        WebDriverWait(driver, 3).until(EC.visibility_of_element_located((By.XPATH, "/html/body/div[3]/div/div/div/div[1]/div[1]")))
-        driver.execute_script("document.getElementsByClassName('modal-close-new')[0].click();")
-    except Exception as e:
-        pass
-    
-    '''
     driver.find_element_by_id('log_in_button').click()
     wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".modal-body")))
     time.sleep(1)
     driver.find_element_by_id('email').send_keys(acc['mail'])
     driver.find_element_by_id('password').send_keys(acc['pwd'])
     driver.find_element_by_css_selector('form.form-horizontal:nth-child(2) > div:nth-child(3) > div:nth-child(1) > button:nth-child(1)').click()
-    '''
-    
 
+    try:
+        WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.XPATH, '//*[@id="dialog_container"]/div/div/div/div[2]/div[2]/div')))
+        driver.execute_script("document.getElementsByClassName('close')[0].click();")
+    except Exception as e:
+        pass
+    driver.get('https://splinterlands.com/?p=battle_history')
+
+
+    try:
+        WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.XPATH, "/html/body/div[3]/div/div/div/div[1]/div[1]")))
+        driver.execute_script("document.getElementsByClassName('modal-close-new')[0].click();")
+    except Exception as e:
+        pass
     check_point = 0
     clone_i = 0
     for i in range(int(match)):
@@ -210,7 +250,7 @@ def battle(match):
         wait.until(EC.visibility_of_element_located((By.ID, "battle_category_btn")))
         vf = i+1
         if vf % 5 == 0:
-            time.sleep(5)
+            time.sleep(3)
             writeHistory(driver, his_path, 20)
             check_point = vf
         driver.execute_script("var roww = document.getElementsByClassName('row')[1].innerHTML;var reg = /HOW TO PLAY|PRACTICE|CHALLENGE|RANKED/;var resultt = roww.match(reg);while(resultt != 'RANKED'){document.getElementsByClassName('slider_btn')[1].click();roww = document.getElementsByClassName('row')[1].innerHTML;resultt = roww.match(reg);};")
@@ -250,7 +290,7 @@ def battle(match):
         wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="dialog_container"]/div/div/div/div[1]/h1')))
         driver.execute_script("document.getElementsByClassName('btn btn--done')[0].click();")
         status('Done')
-    time.sleep(5)
+    time.sleep(3) 
     times_when_smaller_20 = clone_i - check_point
     if times_when_smaller_20 > 0:
         writeHistory(driver, his_path, times_when_smaller_20)
@@ -258,7 +298,47 @@ def battle(match):
     return 'Q'
 
 
-
+def multiBattle():
+    with open(acc_path) as json_file:
+        all_acc = json.load(json_file)
+        json_file.close()
+    acc = []
+    check_point = 1
+    for i in range(len(all_acc)+1):
+        os.system('cls')
+        print("\tSELECT ACCOUNT")
+        if len(acc) > 0:
+            t = 1
+            for z in acc:
+                print(f"[{t}] {z['mail']} (Selected)")
+                t += 1
+        if len(all_acc) >= 0:
+            j = check_point
+            for k in all_acc:
+                print(f'[{j}] {k["mail"]}')
+                j += 1
+            print('\n[S]tart\t\t[Q]uit')
+            n = input('Select: ')
+            if n.isdigit():
+                n = int(n)
+                n -= j
+                acc.append(all_acc[n])
+                all_acc.pop(n)
+                check_point +=1
+            elif n.upper() == 'S':
+                os.system('cls')
+                match = input('Number of match: ')
+                pross = {}
+                for i in range(len(acc)):
+                    keys = 'p' + str(i+1)
+                    pross[keys] = multiprocessing.Process(target=battle, args=(match, acc[i]))
+                for b in pross:
+                    pross[b].start()
+                for k in pross:
+                    pross[k].join()
+                return 'Q'
+            elif n.upper() == 'Q':
+                return 'Q'
 
 def checkMana(add):
     mana = 0
@@ -365,12 +445,9 @@ def teamSorted(team):
 
 
 def addTeam():
-
     team_adding = []
-    
     global mana
     mana = inputMana()
-
     select=''
     while (select != 'Q'):
         with open(team_path) as file:
@@ -382,22 +459,16 @@ def addTeam():
         showList(team_adding)
         print("[S]ave\t\t[C]lear All\t\t[M]ana\t\t[D]elete\t\t[Q]uit edit team\n")
         select = menuOpt(input('Select: '), team_adding)
-
-        
         if (select.isdigit()):
             team_adding.append(list_name[int(select)-1])
- 
-        #Save
         elif (select == 'S'):
             c = team.get(str(mana), 'NotFound')
             if (c != 'NotFound'):
                 team[str(mana)].append(team_adding)
             else:
                 team[str(mana)] = []
-                team[str(mana)].append(team_adding)
-            
+                team[str(mana)].append(team_adding)         
             team_sorted = teamSorted(team)
-
             with open(team_path, 'w') as file:
                 d = json.dump(team_sorted, file, indent=4)
             team_adding.clear()
@@ -407,7 +478,8 @@ def addTeam():
             os.system('cls')
             mana = inputMana()
         elif (select == 'D'):
-            team_adding.pop(-1)
+            if len(team_adding) > 0:
+                team_adding.pop(-1)
         print(team_adding)
     return select
 
@@ -473,16 +545,13 @@ def analys(his_path, team_path):
                 te = input('Select team: ')
         te = int(te) - 1
         b = team[mana][te]
-
         kp = kpi(his_path, mana, b)
-
         os.system('cls')
         print(f'Team: {b}')
         print(f"\nIn {kp[3]} match:")
         print(f'    Won: {kp[0]}')
         print(f'    Lost: {kp[1]}')
-        print(f'    Drawn: {kp[2]}')
-        
+        print(f'    Drawn: {kp[2]}')        
         if kp[3] != 0:
             print('\n\t\t\t\t\t\tHISTORY ENEMY TEAM\n')
             for i in range(len(history[mana])):
@@ -500,7 +569,7 @@ def analys(his_path, team_path):
                     for k in history[mana][i]['enemy_team']['team']:
                         xx.append(str(pp.get(k)))
                     num = " / ".join(xx)
-                    print(f'Number [{num}]')
+                    print(f'Number [{num}]\n')
         n = input('\n[Q]uit\t[R]eturn View team\nSelect: ').upper()
         while(n!='R' and n!='Q'):
             os.system('cls')
@@ -510,6 +579,7 @@ def analys(his_path, team_path):
             return 'R'
         else:
             return 'Q'
+
 
 def viewTeam():
     os.system('cls')
@@ -564,7 +634,6 @@ def delTeamGUI():
         for i in range(len(lt)):
             print(f'{i+1}. {lt[i]}')
         td = input('\nSelect: ')
-
         while((td <= '0' or td > str(len(lt))) and td.isalpha):
             os.system('cls')
             print(f'Mana: {x}')
@@ -573,7 +642,6 @@ def delTeamGUI():
                 print(f'{i+1}. {lt[i]}')
             print("\nInvalid syntax! Try again.")
             td = input('Select: ')
-
         os.system('cls')
         st = lt[int(td)-1]
         acpt = input(f'Team selected:\n{st}\n\nDo you want delete this team? [Y/N]\nSelect: ').upper()
@@ -614,7 +682,6 @@ def delTeam():
     for i in range(len(lt)):
         print(f'{i+1}. {lt[i]}')
     td = input('\nSelect: ')
-
     while((td <= '0' or td > str(len(lt))) and td.isalpha):
         os.system('cls')
         print(f'Mana: {x}')
@@ -623,7 +690,6 @@ def delTeam():
             print(f'{i+1}. {lt[i]}')
         print("\nInvalid syntax! Try again.")
         td = input('Select: ')
-
     os.system('cls')
     st = lt[int(td)-1]
     acpt = input(f'Team selected:\n{st}\n\nDo you want delete this team? [Y/N]\nSelect: ').upper()
@@ -686,20 +752,18 @@ logo = '''
 
 def menu():
     os.system('cls')
-    #print('\t****TEAM MANAGE****')
     print(logo)
     print(f"\t\t\t\t\t\t    Version {version}")
-    print('\n1. START GAME\n2. Add team\n3. View team\n4. Delete team\n\n[Q]uit')
+    print('\n[1] Run Game\n[2] Add Team\n[3] View Team\n[4] Delete Team\n[5] Run Game with Multi-account (test)\n[6] Manage Account\n\n[Q]uit')
     select = input('\nSelect: ')
     if select.isalpha():
         select = select.upper()
-    list_op = ['1', '2', '3','4', 'Q']
+    list_op = ['1', '2', '3', '4', '5', '6', 'Q']
     while (not btn(select, list_op)):
         os.system('cls')
-        #print('\t****TEAM MANAGE****')
         print(logo)
         print(f"\t\t\t\t\t\t    Version {version}")
-        print('\n1. START GAME\n2. Add team\n3. View team\n4. Delete team\n\n[Q]uit')
+        print('\n[1] Run Game\n[2] Add Team\n[3] View Team\n[4] Delete Team\n[5] Run Game with Multi-account (test)\n[6] Manage Account\n\n[Q]uit')
         print("Invalid syntax! Try again.")
         select = input('\nSelect: ')
         if select.isalpha():
@@ -724,13 +788,15 @@ def check_update():
     new_version = response.text[:3]
     if(version != new_version):
         os.system('cls')
-        cf = input(f'New Update! Version {new_version}\nDo you want Update? [Y/N] ')
+        print(bruhh)
+        cf = input(f'  New Update! Version {new_version}\n  Do you want Update? [Y/N]')
         if (cf.isalpha()):
             cf = cf.upper()
         while(cf != 'Y' and cf != 'N'):
             os.system('cls')
-            print("Invalid syntax! Try again.")
-            cf = input('New update! Do you want update? [Y/N] ')
+            print(bruhh)
+            print("  Invalid syntax! Try again.")
+            cf = input(f'  New Update! Version {new_version}\n  Do you want Update? [Y/N]')
             if (cf.isalpha()):
                 cf = cf.upper()
         if (cf == 'Y'):
@@ -754,6 +820,32 @@ def btn(x,li):
             break   
     return check        
 
+bruhh="""
+                                            ───────▄▀▀▀▀▀▀▀▀▀▀▄▄
+                                            ────▄▀▀░░░░░░░░░░░░░▀▄
+                                            ──▄▀░░░░░░░░░░░░░░░░░░▀▄
+                                            ──█░░░░░░░░░░░░░░░░░░░░░▀▄
+                                            ─▐▌░░░░░░░░▄▄▄▄▄▄▄░░░░░░░▐▌
+                                            ─█░░░░░░░░░░░▄▄▄▄░░▀▀▀▀▀░░█
+                                            ▐▌░░░░░░░▀▀▀▀░░░░░▀▀▀▀▀░░░▐▌
+                                            █░░░░░░░░░▄▄▀▀▀▀▀░░░░▀▀▀▀▄░█
+                                            █░░░░░░░░░░░░░░░░▀░░░▐░░░░░▐▌
+                                            ▐▌░░░░░░░░░▐▀▀██▄░░░░░░▄▄▄░▐▌
+                                            ─█░░░░░░░░░░░▀▀▀░░░░░░▀▀██░░█
+                                            ─▐▌░░░░▄░░░░░░░░░░░░░▌░░░░░░█
+                                            ──▐▌░░▐░░░░░░░░░░░░░░▀▄░░░░░█
+                                            ───█░░░▌░░░░░░░░▐▀░░░░▄▀░░░▐▌
+                                            ───▐▌░░▀▄░░░░░░░░▀░▀░▀▀░░░▄▀
+                                            ───▐▌░░▐▀▄░░░░░░░░░░░░░░░░█
+                                            ───▐▌░░░▌░▀▄░░░░▀▀▀▀▀▀░░░█
+                                            ───█░░░▀░░░░▀▄░░░░░░░░░░▄▀
+                                            ──▐▌░░░░░░░░░░▀▄░░░░░░▄▀
+                                            ─▄▀░░░▄▀░░░░░░░░▀▀▀▀█▀
+                                            ▀░░░▄▀░░░░░░░░░░▀░░░▀▀▀▀▄▄▄▄▄
+
+"""
+
+
 def main():
     select = ''
     upd = check_update()
@@ -764,8 +856,13 @@ def main():
     while (select != 'Q'):
         os.system('cls')
         if (select == '1'):
+            acc = select_account()
+            os.system('cls')
+            print(f'Selected: {acc["mail"]}')
             match = input('Number of match: ')
-            n = battle(match)
+            with open(acc_path) as json_file:
+                acc = json.load(json_file)
+            n = battle(match, acc)
             if (n == 'Q'):
                 select = menu()
         elif (select == '2'):
@@ -784,4 +881,14 @@ def main():
             n = delTeam()
             if (n == 'Q'):
                 select = menu()
+        elif (select == '5'):
+            n = multiBattle()
+            if (n == 'Q'):
+                select = menu()
+        elif (select == '6'):
+            n = account_manage()
+            if (n == 'Q'):
+                select = menu()
     os.system('cls')
+
+#add_account()
