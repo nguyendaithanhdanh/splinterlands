@@ -461,8 +461,17 @@ def analys(his_path, team_path):
         for i in team[mana]:
              print(f'{j}. {i}')
              j += 1
-        te = int(input('Select team: '))
-        te -=1
+        te = input('Select team: ')
+        while(te.isalpha()):
+            if (int(te) - 1 < 0 or int(te) - 1>len(team[mana])):
+                os.system('cls')
+                print(f' Mana {mana}:\n')
+                j = 1
+                for i in team[mana]:
+                     print(f'{j}. {i}')
+                     j += 1
+                te = input('Select team: ')
+        te = int(te) - 1
         b = team[mana][te]
 
         kp = kpi(his_path, mana, b)
@@ -501,7 +510,6 @@ def analys(his_path, team_path):
             return 'R'
         else:
             return 'Q'
-
 
 def viewTeam():
     os.system('cls')
