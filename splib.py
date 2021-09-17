@@ -144,7 +144,7 @@ def writeHistory(driver, his_path, times):
 
         result_ = result[:-3]
         if result[:-3] != "Battle Lost" and result[:-3] != "Battle Won":
-            result_ = 'Draw'
+            result_ = 'Drawn'
 
         match = {}
         match['mode'] = mode[:-4]
