@@ -10,7 +10,3 @@ def update_lib():
 	
 	splib = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/splib.py')
 	saveFile('splib.py', splib.text)
-	
-	account = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/master/account.json')
-	saveFile('./data/account.json', account.text)
-	
