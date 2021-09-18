@@ -10,7 +10,7 @@ import getpass, time, io, json, random, os, requests, update, re
 import pickle
 
 
-version = '1.7.5'
+version = '1.7.6'
 username = getpass.getuser()
 usr_path=('C:/Users/', username, '/AppData/Local/Google/Chrome/User Data')
 filePath = ''.join(usr_path)
@@ -94,21 +94,36 @@ def account_manage():
     while(n != 'Q'):
         os.system('cls')
         print('\tACCOUNT LIST\n')
-        with open(acc_path) as json_file:
-            all_acc = json.load(json_file)
-            json_file.close()
-        j = 1
-        for i in all_acc:
-            print(f'{j}. {i["mail"]}')
-            j += 1
-        print("\n[A]dd\t\t[D]elete\t\t[Q]uit")
-        n = input('Select: ').upper()
-        if n == 'A':
-            add_account()
-        elif n == 'D':
-            del_account()
-        elif n != 'Q':
-            print('Invalid syntax!')
+        try:
+            with open(acc_path) as json_file:
+                all_acc = json.load(json_file)
+                json_file.close()
+        except Exception as e:
+            all_acc = []
+
+        if len(all_acc) > 0:
+            j = 1
+            for i in all_acc:
+                print(f'{j}. {i["mail"]}')
+                j += 1
+            print("\n[A]dd\t\t[D]elete\t\t[Q]uit")
+            n = input('Select: ').upper()
+            if n == 'A':
+                add_account()
+            elif n == 'D':
+                del_account()
+            elif n != 'Q':
+                print('Invalid syntax!')
+        else:
+            print('    Account is empty')
+            print("\n[A]dd\t\t[Q]uit")
+            n = input('Select: ').upper()
+            if n == 'A':
+                add_account()
+            elif n != 'Q':
+                print('Invalid syntax!')
+
+
     return 'Q'
 
 
