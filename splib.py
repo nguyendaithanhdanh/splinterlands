@@ -7,24 +7,17 @@ from selenium.webdriver.support.expected_conditions import presence_of_element_l
 from bs4 import BeautifulSoup
 import multiprocessing
 import getpass, time, io, json, random, os, requests, update, re
-import pickle
 
-
-version = '1.7.6'
+version = '1.7.7'
 username = getpass.getuser()
 usr_path=('C:/Users/', username, '/AppData/Local/Google/Chrome/User Data')
 filePath = ''.join(usr_path)
-
 card_path = './data/card.json'
 team_path = './data/team.json'
 src_web_path = './data/source_web.html'
 color_path = './data/color_card.json'
 acc_path = './data/account.json'
 his_path = './data/history.json'
-
-
-
-
 
 with open(card_path) as json_file:
     card = json.load(json_file)
@@ -42,14 +35,10 @@ def add_account():
         all_acc = [] 
     acc = {}
     os.system('cls')
-
     mail = input('Email: ')
     pwd = input('Password: ')
-
     acc['mail'] = mail
     acc['pwd'] = pwd
-    #print(acc)
-    #input()
     all_acc.append(acc)
     with open(acc_path, 'w') as file:
         d = json.dump(all_acc, file, indent=4)
@@ -82,15 +71,25 @@ def del_account():
             n = 'B'
 
 def select_account():
-    with open(acc_path) as json_file:
-        all_acc = json.load(json_file)
-        json_file.close()
-    j = 1
-    for i in all_acc:
-        print(f'{j}. {i["mail"]}')
-        j += 1
-    n = int(input('Select account: '))
-    return all_acc[n-1]
+    n = ''
+    while(n != 'Q'):
+        os.system('cls')
+        print('    SELECT ACCOUNT')
+        with open(acc_path) as json_file:
+            all_acc = json.load(json_file)
+            json_file.close()
+        j = 1
+        for i in all_acc:
+            print(f'[{j}] {i["mail"]}')
+            j += 1
+        print('\n[Q]uit')
+        n = input('Select: ').upper()
+        if n.isdigit() and int(n) - 1 < len(all_acc) and int(n) - 1 >= 0:
+            return all_acc[n-1]
+        elif n!='Q':
+            print('Invalid syntax!')
+            time.sleep(1)
+    return 'Q'
 
 def account_manage():
     n = ''
@@ -125,8 +124,6 @@ def account_manage():
                 add_account()
             elif n != 'Q':
                 print('Invalid syntax!')
-
-
     return 'Q'
 
 
@@ -154,7 +151,6 @@ def pickranTeam(mana, card_path):
     lst_color = list(color.keys())
     list_name = []
     p = random.randint(0,2)
-    # Return color
     g_color = lst_color[p]
     while(int(count_mana) <= int(mana) and len(list_name) <= 7):
         macrr = count_mana
@@ -190,7 +186,6 @@ def writeHistory(driver, his_path, times):
         en_name = ''
         en_rat = ''
         en_gui = ''
-
         for j in range(len(btl_log)-3, -1, -1):
             if btl_log[j].isdigit():
                 en_name = btl_log[j+1]
@@ -199,38 +194,31 @@ def writeHistory(driver, his_path, times):
                 for z in range(j+3, len(btl_log)-3):
                     enemy.append(btl_log[z])
                 break
-
         result = btl_log[len(me)+4]
         mode = btl_log[-3]
         mana=btl_log[len(me)+7]
         if mana == '0':
             mana=btl_log[len(me)+9]
         if mana == 'DEC':
-            mana=btl_log[len(me)+10]
-            
+            mana=btl_log[len(me)+10]            
         my_team = {}
         my_team['name'] = btl_log[1]
         my_team['rating'] = btl_log[0]
         my_team['guid_name'] = btl_log[2]
         my_team['team'] = me
-
         enemy_team = {}
         enemy_team['name'] = en_name
         enemy_team['rating'] = en_rat
         enemy_team['guid_name'] = en_gui
         enemy_team['team'] = enemy
-
-
         result_ = result[:-3]
         if result[:-3] != "Battle Lost" and result[:-3] != "Battle Won":
             result_ = 'Drawn'
-
         match = {}
         match['mode'] = mode[:-4]
         match['result'] = result_
         match['my_team'] = my_team
         match['enemy_team'] = enemy_team
-
         if history.get(mana, 'Non') == 'Non':
             history[mana] = []
             history[mana].append(match)
@@ -262,15 +250,12 @@ def battle(match, acc):
     driver.find_element_by_id('email').send_keys(acc['mail'])
     driver.find_element_by_id('password').send_keys(acc['pwd'])
     driver.find_element_by_css_selector('form.form-horizontal:nth-child(2) > div:nth-child(3) > div:nth-child(1) > button:nth-child(1)').click()
-
     try:
         WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.XPATH, '//*[@id="dialog_container"]/div/div/div/div[2]/div[2]/div')))
         driver.execute_script("document.getElementsByClassName('close')[0].click();")
     except Exception as e:
         pass
     driver.get('https://splinterlands.com/?p=battle_history')
-
-
     try:
         WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.XPATH, "/html/body/div[3]/div/div/div/div[1]/div[1]")))
         driver.execute_script("document.getElementsByClassName('modal-close-new')[0].click();")
@@ -295,8 +280,7 @@ def battle(match, acc):
         mana = driver.find_element_by_css_selector('div.col-md-3:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1)').text
         team = pickTeam(mana)
         if team == 'None':
-            team = pickranTeam(mana, card)
-        
+            team = pickranTeam(mana, card)     
         status('Creating team...')
         driver.execute_script("document.getElementsByClassName('btn btn--create-team')[0].click();")
         #Select card
@@ -317,9 +301,7 @@ def battle(match, acc):
         except Exception as e:
             status('Done')
             wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="dialog_container"]/div/div/div/div[1]/h1')))
-            driver.execute_script("document.getElementsByClassName('btn btn--done')[0].click();")
-
-        
+            driver.execute_script("document.getElementsByClassName('btn btn--done')[0].click();")        
         wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="dialog_container"]/div/div/div/div[1]/h1')))
         driver.execute_script("document.getElementsByClassName('btn btn--done')[0].click();")
         status('Done')
@@ -329,6 +311,26 @@ def battle(match, acc):
         writeHistory(driver, his_path, times_when_smaller_20)
     driver.quit()
     return 'Q'
+
+def topPick(mana):
+    with open('./data/history.json') as file:
+        history = json.load(file)
+        file.close()
+    print(f"CARD LEADERBOARD CHOSEN BY ENEMY with {mana} MANA\n")
+    team = {}
+    for i in history[mana]:
+        team_enemy = i['enemy_team']['team']
+        #print(team_enemy)
+        for j in team_enemy:
+            if team.get(j, 'None') == 'None':
+                team[j] = 1
+            else:
+                x = team[j]
+                x += 1
+                team[j] = x
+    items_sorted = sorted(team.items(), reverse=True, key = lambda x : x[1])
+    for i in items_sorted:
+        print(f'{i[0]:>20}: {i[1]:>2} time(s)')
 
 
 def multiBattle():
@@ -350,7 +352,7 @@ def multiBattle():
                 for z in acc:
                     print(f"{t}. {z['mail']}")
                     t += 1
-            print('_'*20)
+            print('_'*30)
             if len(all_acc) >= 0:
                 j = 1
                 for k in all_acc:
@@ -371,8 +373,7 @@ def multiBattle():
                     pross = {}
                     for i in range(len(acc)):
                         keys = 'p' + str(i+1)
-                        pross[keys] = multiprocessing.Process(target=battle, args=(match, acc[i]))
-                    
+                        pross[keys] = multiprocessing.Process(target=battle, args=(match, acc[i]))                    
                     for b in pross:
                         pross[b].start()
                     for k in pross:
@@ -449,17 +450,6 @@ def menuOpt(select, team_adding):
         else:
             os.system('cls')
             print('Team have been saved!')
-            '''
-            notifi = input('Do you want continue? [Y/N] ').upper()
-            while (notifi != 'Y' and notifi != 'N'):
-                os.system('cls')
-                notifi = input('Do you want continue? [Y/N]').upper()
-            os.system('cls')
-            if (notifi == 'N'):
-                return 'Q'
-            else:
-                mana = inputMana()
-            '''
             time.sleep(1)
     return select
 
@@ -496,15 +486,14 @@ def teamSorted(team):
     for i in s:
         s_int.append(int(i))
     s_sorted = sorted(s_int)
-
     team_sorted = {}
     for i in s_sorted:
         p = team.get(str(i))
         team_sorted[i] = p
     return team_sorted
 
-
 def addTeam():
+    os.system('cls')
     team_adding = []
     global mana
     mana = inputMana()
@@ -549,7 +538,6 @@ def list_name_dict():
         lname[list_name[i-1]] = str(i)
     return lname 
 
-
 def kpi(his_path, mana, team):
     with open(his_path) as json_file:
         history = json.load(json_file)
@@ -569,99 +557,97 @@ def kpi(his_path, mana, team):
         match = won + lost + drawn
     return [won, lost, drawn, match]
 
-
-def analys(his_path, team_path):
+def analys(mana):
     with open(his_path) as json_file:
         history = json.load(json_file)
     with open(team_path) as json_file:
         team = json.load(json_file)
-    print('\n[Q]uit\n')
-    mana = input('Enter mana to view details: ').upper()
-    while((team.get(mana, 'Non') == 'Non') and mana != 'Q'):
-        print('[!] Mana is not available!')
-        time.sleep(1)
+    te = ''
+    while (te != 'B'):
         os.system('cls')
-        viewTeam()
-        print('\n[Q]uit\n')
-        mana = input('Enter mana to view details: ').upper()
-    if mana == 'Q':
-        return 'Q'
-    else:
-        os.system('cls')
-        print(f' Mana {mana}:\n')
+        topPick(mana)
+        print('_'*100)
+        print()
         j = 1
         for i in team[mana]:
-             print(f'{j}. {i}')
-             j += 1
-        te = input('Select team: ')
-        while(te.isalpha()):
-            if (int(te) - 1 < 0 or int(te) - 1>len(team[mana])):
-                os.system('cls')
-                print(f' Mana {mana}:\n')
-                j = 1
-                for i in team[mana]:
-                     print(f'{j}. {i}')
-                     j += 1
-                te = input('Select team: ')
-        te = int(te) - 1
-        b = team[mana][te]
-        kp = kpi(his_path, mana, b)
-        os.system('cls')
-        print(f'Team: {b}')
-        print(f"\nIn {kp[3]} match:")
-        print(f'    Won: {kp[0]}')
-        print(f'    Lost: {kp[1]}')
-        print(f'    Drawn: {kp[2]}')        
-        if kp[3] != 0:
-            print('\n\t\t\t\t\t\tHISTORY ENEMY TEAM\n')
-            for i in range(len(history[mana])):
-                if history[mana][i]['my_team']['team'] == b:
-                    rsl = history[mana][i]['result']
-                    x = rsl[7:]
-                    if x != 'Won' and x!='Lost':
-                        x = "Drawn"
-                    print(f'> {x:<4}', end=": ")
-                    print('[', end="")
-                    print(", ".join(history[mana][i]['enemy_team']['team']), end="")
-                    print(']')
-                    xx = []
-                    pp = list_name_dict()
-                    for k in history[mana][i]['enemy_team']['team']:
-                        xx.append(str(pp.get(k)))
-                    num = " / ".join(xx)
-                    print(f'Number [{num}]\n')
-        n = input('\n[Q]uit\t[R]eturn View team\nSelect: ').upper()
-        while(n!='R' and n!='Q'):
+            print(f'[{j}] {", ".join(i)}')
+            j += 1
+        print('\n[B]ack')
+        te = input('Select team: ').upper()
+        if te.isdigit() and (int(te) - 1 >= 0 and int(te) - 1 < len(team[mana])):
+            te = int(te) - 1
+            b = team[mana][te]
+            kp = kpi(his_path, mana, b)
             os.system('cls')
+            print(f'Team: {b}')
+            print(f"\nIn {kp[3]} match:")
+            print(f'    Won: {kp[0]}')
+            print(f'    Lost: {kp[1]}')
+            print(f'    Drawn: {kp[2]}')        
+            if kp[3] != 0:
+                print('\n\t\t\t\t\t\tHISTORY ENEMY TEAM\n')
+                for i in range(len(history[mana])):
+                    if history[mana][i]['my_team']['team'] == b:
+                        rsl = history[mana][i]['result']
+                        x = rsl[7:]
+                        if x != 'Won' and x!='Lost':
+                            x = "Drawn"
+                        print(f'> {x:<4}', end=": ")
+                        print('[', end="")
+                        print(", ".join(history[mana][i]['enemy_team']['team']), end="")
+                        print(']')
+                        xx = []
+                        pp = list_name_dict()
+                        for k in history[mana][i]['enemy_team']['team']:
+                            xx.append(str(pp.get(k)))
+                        num = " / ".join(xx)
+                        print(f'Number [{num}]\n')
+            n = input('\n[B]ack\t[R]eturn View team\nSelect: ').upper()
+            while(n!='R' and n!='B'):
+                os.system('cls')
+                print('Invalid syntax!')
+                n = input('\n[B]ack\t[R]eturn View team\nSelect: ').upper()
+            if n == 'R':
+                te = 'B'
+        elif te != 'B':
             print('Invalid syntax!')
-            n = input('\n[Q]uit\t[R]eturn View team\nSelect: ').upper()
-        if n == 'R':
-            return 'R'
-        else:
-            return 'Q'
+            time.sleep(1)
 
 
 def viewTeam():
-    os.system('cls')
-    with open(team_path) as json_file:
-        team = json.load(json_file)
-    for i in team:
+    n =''
+    while (n != 'Q'):
+        os.system('cls')
+        with open(team_path) as json_file:
+            team = json.load(json_file)
+        for i in team:
+            print('_'*120)
+            print(f'\n MANA {i}:')
+            k = 1
+            for j in team[i]:
+                kp = kpi(his_path, i, j)
+                percent = 0.0
+                if kp[3] != 0:
+                    percent = int(kp[0]) / int(kp[3]) *100
+                p = ", ".join(j)
+                print(f'{k}. {p}')
+                print(f'   --> Won: {kp[0]}  /  Lost: {kp[1]}  /  Drawn: {kp[2]} | in {kp[3]} match | Win rate {percent}%')
+                k += 1
+                print()
         print('_'*120)
-        print(f'\n MANA {i}:')
-        k = 1
-        for j in team[i]:
-            kp = kpi(his_path, i, j)
-            percent = 0.0
-            if kp[3] != 0:
-                percent = int(kp[0]) / int(kp[3]) *100
-            p = ", ".join(j)
-            print(f'{k}. {p}')
-            print(f'   --> Won: {kp[0]}  /  Lost: {kp[1]}  /  Drawn: {kp[2]} | in {kp[3]} match | Win rate {percent}%')
-            k += 1
-            print()
-    print('_'*120)
-    print()
-
+        print('\nEnter mana to view details')
+        print('\n[A]dd team\t\t[D]elete team\t\t[Q]uit')
+        n = input('\nSelect: ').upper()
+        if n == 'A':
+            addTeam()
+        elif n == 'D':
+            delTeam()
+        elif n.isdigit() and (team.get(n, 'Non') != 'Non'):
+            analys(n)
+        elif n != 'Q':
+            print('Invalid syntax!')
+            time.sleep(1)
+    return 'Q'
 
 def showList(list):
     if (len(list) > 0):
@@ -670,70 +656,16 @@ def showList(list):
             print(f'{i+1}. {list[i]} ')
         print('-'*20)
 
-
-
-def delTeamGUI():
-    z = 'Q'
-    while(z == 'Q'):
-        with open(team_path) as json_file:
-            list_team = json.load(json_file)
-        os.system('cls')
-        viewTeam()
-        x = input('\nSelect a mana: ')
-        lt = list_team.get(x, 'None')
-        while lt == 'None':
-            os.system('cls')
-            viewTeam()
-            print('\nTeam not found! Try again.')
-            x = input('\nSelect a mana: ')
-            print('\nSelect a team to delete:\n')
-            lt = list_team.get(x, 'None')
-        os.system('cls')
-        print(f'Mana: {x}')
-        print('\nSelect a team to delete:\n')
-        for i in range(len(lt)):
-            print(f'{i+1}. {lt[i]}')
-        td = input('\nSelect: ')
-        while((td <= '0' or td > str(len(lt))) and td.isalpha):
-            os.system('cls')
-            print(f'Mana: {x}')
-            print('\nSelect a team to delete:\n')
-            for i in range(len(lt)):
-                print(f'{i+1}. {lt[i]}')
-            print("\nInvalid syntax! Try again.")
-            td = input('Select: ')
-        os.system('cls')
-        st = lt[int(td)-1]
-        acpt = input(f'Team selected:\n{st}\n\nDo you want delete this team? [Y/N]\nSelect: ').upper()
-        while (acpt != 'Y' and acpt != 'N'):
-            os.system('cls')
-            print("Invalid syntax! Try again.")
-            acpt = input(f'Team selected:\n{st}\n\nDo you want delete this team? [Y/N]\nSelect: ').upper()
-        if acpt == 'Y':
-            list_team[x].pop(int(td)-1)
-            if len(list_team[x]) == 0:
-                list_team.pop(x)
-            with open(team_path, 'w') as file:
-                b = json.dump(list_team, file, indent=4)
-            os.system('cls')
-            print('Done')
-            time.sleep(1)
-            z = 'Q'
-        else:
-            z = 'Q'
-
 def delTeam():
     with open(team_path) as json_file:
         list_team = json.load(json_file)
     os.system('cls')
-    viewTeam()
-    x = input('\nSelect a mana: ')
+    x = input('Enter mana: ')
     lt = list_team.get(x, 'None')
     while lt == 'None':
         os.system('cls')
-        viewTeam()
-        print('\nTeam not found! Try again.')
-        x = input('\nSelect a mana: ')
+        print('Team not found! Try again.')
+        x = input('Enter mana: ')
         print('\nSelect a team to delete:\n')
         lt = list_team.get(x, 'None')
     os.system('cls')
@@ -766,10 +698,6 @@ def delTeam():
         os.system('cls')
         print('Done')
         time.sleep(1)
-        return 'Q'
-    else:
-        return 'Q'
-
 
 def ranTeam(team):
     if len(team) == 1:
@@ -800,7 +728,6 @@ def createCard():
     with open(card_path, 'w') as file:
         b = json.dump(card, file, indent=4)
 
-
 logo = '''
 \t\t\t\t\t░██████╗██████╗░██╗░░░░░██╗██████╗░
 \t\t\t\t\t██╔════╝██╔══██╗██║░░░░░██║██╔══██╗
@@ -809,25 +736,20 @@ logo = '''
 \t\t\t\t\t██████╔╝██║░░░░░███████╗██║██████╦╝
 \t\t\t\t\t╚═════╝░╚═╝░░░░░╚══════╝╚═╝╚═════╝░
 '''
-
 def menu():
     os.system('cls')
     print(logo)
     print(f"\t\t\t\t\t\t    Version {version}")
-    print('\n[1] Run Game\n[2] Add Team\n[3] View Team\n[4] Delete Team\n[5] Run Game with Multi-account (test)\n[6] Manage Account\n\n[Q]uit')
-    select = input('\nSelect: ')
-    if select.isalpha():
-        select = select.upper()
-    list_op = ['1', '2', '3', '4', '5', '6', 'Q']
+    print('\n[1] Run Game\n[2] Run Game with Multi-account\n[3] Manage Team\n[4] Manage Account\n\n[Q]uit')
+    select = input('\nSelect: ').upper()
+    list_op = ['1', '2', '3', '4', 'Q']
     while (not btn(select, list_op)):
         os.system('cls')
         print(logo)
         print(f"\t\t\t\t\t\t    Version {version}")
-        print('\n[1] Run Game\n[2] Add Team\n[3] View Team\n[4] Delete Team\n[5] Run Game with Multi-account (test)\n[6] Manage Account\n\n[Q]uit')
+        print('\n[1] Run Game\n[2] Run Game with Multi-account\n[3] Manage Team\n[4] Manage Account\n\n[Q]uit')
         print("Invalid syntax! Try again.")
-        select = input('\nSelect: ')
-        if select.isalpha():
-            select = select.upper()
+        select = input('\nSelect: ').upper()
     return select
 
 def shutDown(mess):
@@ -842,23 +764,18 @@ def getUpdate():
     saveFile('update.py', response.text)
 
 def check_update():
-    global version
     print('Checking Update...')
     response = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/version')
     new_version = response.text[:5]
     if(version != new_version):
         os.system('cls')
         print(bruhh)
-        cf = input(f'  New Update! Version {new_version}\n  Do you want Update? [Y/N]')
-        if (cf.isalpha()):
-            cf = cf.upper()
+        cf = input(f'  New Update! Version {new_version}\n  Do you want Update? [Y/N]').upper()
         while(cf != 'Y' and cf != 'N'):
             os.system('cls')
             print(bruhh)
             print("  Invalid syntax! Try again.")
-            cf = input(f'  New Update! Version {new_version}\n  Do you want Update? [Y/N]')
-            if (cf.isalpha()):
-                cf = cf.upper()
+            cf = input(f'  New Update! Version {new_version}\n  Do you want Update? [Y/N]').upper()
         if (cf == 'Y'):
             os.system('cls')
             print('Updating...')
@@ -870,7 +787,6 @@ def check_update():
             return 'OK'
 
 def btn(x,li):
-
     if (x.isalpha()):
         x = x.upper()
     check = False
@@ -905,7 +821,6 @@ bruhh="""
 
 """
 
-
 def main():
     select = ''
     upd = check_update()
@@ -917,33 +832,26 @@ def main():
         os.system('cls')
         if (select == '1'):
             acc = select_account()
-            os.system('cls')
-            print(f'Selected: {acc["mail"]}')
-            match = input('Number of match: ')
-            n = battle(match, acc)
-            if (n == 'Q'):
+            if acc != 'Q':
+                os.system('cls')
+                print(f'Selected: {acc["mail"]}')
+                match = input('Number of match: ')
+                n = battle(match, acc)
+                if (n == 'Q'):
+                    select = menu()
+            else:
                 select = menu()
         elif (select == '2'):
-            n = addTeam()
+            n = multiBattle()
             if (n == 'Q'):
                 select = menu()
         elif (select == '3'):
-            viewTeam()
-            n = analys(his_path, team_path)
-            #
+            n = viewTeam()
             if (n == 'Q'):
                 select = menu()
             elif (n== 'R'):
                 select == '3'
         elif (select == '4'):
-            n = delTeam()
-            if (n == 'Q'):
-                select = menu()
-        elif (select == '5'):
-            n = multiBattle()
-            if (n == 'Q'):
-                select = menu()
-        elif (select == '6'):
             n = account_manage()
             if (n == 'Q'):
                 select = menu()
