@@ -10,16 +10,22 @@ import multiprocessing
 import getpass, time, io, json, random, os, requests, update, re
 import pickle
 
-version = '1.7'
+
+version = '1.7.5'
 username = getpass.getuser()
 usr_path=('C:/Users/', username, '/AppData/Local/Google/Chrome/User Data')
 filePath = ''.join(usr_path)
+
 card_path = './data/card.json'
 team_path = './data/team.json'
 src_web_path = './data/source_web.html'
 color_path = './data/color_card.json'
 acc_path = './data/account.json'
 his_path = './data/history.json'
+
+
+
+
 
 with open(card_path) as json_file:
     card = json.load(json_file)
@@ -48,23 +54,30 @@ def add_account():
     all_acc.append(acc)
     with open(acc_path, 'w') as file:
         d = json.dump(all_acc, file, indent=4)
-    account_manage()
 
 def del_account():
-    os.system('cls')
-    with open(acc_path) as json_file:
-        all_acc = json.load(json_file)
-        json_file.close()
-    j = 1
-    for i in all_acc:
-        print(f'{j}. {i["mail"]}')
-        j += 1
-    n = int(input('Select account to delete: '))
-    all_acc.pop(n-1)
-    with open(acc_path, 'w') as file:
-        d = json.dump(all_acc, file, indent=4)
-        file.close()
-    account_manage()
+    n = ''
+    while (n != 'B'):
+        os.system('cls')
+        with open(acc_path) as json_file:
+            all_acc = json.load(json_file)
+            json_file.close()
+        j = 1
+        for i in all_acc:
+            print(f'[{j}] {i["mail"]}')
+            j += 1
+        print('\n[B]ack')
+        n = input('Select account to delete: ')
+        if n.isalpha():
+            n = n.upper()
+        if (n.isdigit() and int(n) - 1 < len(all_acc) and int(n) - 1 >= 0):
+            all_acc.pop(int(n)-1)
+            with open(acc_path, 'w') as file:
+                d = json.dump(all_acc, file, indent=4)
+                file.close()
+        elif n != 'B':
+            print('Invalid syntax!')
+            time.sleep(1)
 
 def select_account():
     with open(acc_path) as json_file:
@@ -78,22 +91,25 @@ def select_account():
     return all_acc[n-1]
 
 def account_manage():
-    os.system('cls')
-    with open(acc_path) as json_file:
-        all_acc = json.load(json_file)
-        json_file.close()
-    j = 1
-    for i in all_acc:
-        print(f'{j}. {i["mail"]}')
-        j += 1
-    print("\n[A]dd\t\t[D]elete\t\t[Q]uit")
-    n = input('Select: ').upper()
-    if n == 'A':
-        add_account()
-    elif n == 'D':
-        del_account()
-    elif n == 'Q':
-        return 'Q'
+    n = ''
+    while(n != 'Q'):
+        os.system('cls')
+        print('\tACCOUNT LIST\n')
+        with open(acc_path) as json_file:
+            all_acc = json.load(json_file)
+            json_file.close()
+        j = 1
+        for i in all_acc:
+            print(f'{j}. {i["mail"]}')
+            j += 1
+        print("\n[A]dd\t\t[D]elete\t\t[Q]uit")
+        n = input('Select: ').upper()
+        if n == 'A':
+            add_account()
+        elif n == 'D':
+            del_account()
+        elif n != 'Q':
+            print('Invalid syntax!')
     return 'Q'
 
 
@@ -221,7 +237,7 @@ def battle(match, acc):
     #chrome_options.add_argument("user-data-dir="+filePath)
     driver = webdriver.Chrome('./data/webdriver/chromedriver', options = chrome_options)
     wait = WebDriverWait(driver, 500)
-
+    #driver.minimize_window()
     driver.get('https://splinterlands.com/?p=battle_history')
     driver.find_element_by_id('log_in_button').click()
     wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".modal-body")))
@@ -302,43 +318,61 @@ def multiBattle():
     with open(acc_path) as json_file:
         all_acc = json.load(json_file)
         json_file.close()
+    bbg=[]
+    for dos in all_acc:
+        bbg.append(dos['mail'])
+    bbg = sorted(bbg)
     acc = []
-    check_point = 1
-    for i in range(len(all_acc)+1):
+    n = ''
+    while (n != 'Q'):
+    #for i in range(len(all_acc)+1):
         os.system('cls')
-        print("\tSELECT ACCOUNT")
+        print("    SELECT ACCOUNT")
+        print(f'\n\n  Selected {len(acc)} account')
         if len(acc) > 0:
             t = 1
             for z in acc:
-                print(f"[{t}] {z['mail']} (Selected)")
+                print(f"{t}. {z}")
                 t += 1
-        if len(all_acc) >= 0:
-            j = check_point
-            for k in all_acc:
-                print(f'[{j}] {k["mail"]}')
+        print('_'*20)
+        if len(bbg) >= 0:
+            j = 1
+            for k in bbg:
+                print(f'[{j}] {k}')
                 j += 1
-            print('\n[S]tart\t\t[Q]uit')
+            print('\n[S]tart\t\t[C]lear\t\t[Q]uit')
             n = input('Select: ')
-            if n.isdigit():
+            if n.isalpha():
+                n = n.upper()
+            if n.isdigit() and int(n) - 1 < len(bbg) and int(n) - 1 >= 0:
                 n = int(n)
                 n -= j
-                acc.append(all_acc[n])
-                all_acc.pop(n)
-                check_point +=1
-            elif n.upper() == 'S':
+                acc.append(bbg[n])
+                bbg.pop(n)
+            elif n == 'S' and len(acc) > 0:
                 os.system('cls')
                 match = input('Number of match: ')
                 pross = {}
                 for i in range(len(acc)):
                     keys = 'p' + str(i+1)
                     pross[keys] = multiprocessing.Process(target=battle, args=(match, acc[i]))
+                
                 for b in pross:
                     pross[b].start()
                 for k in pross:
                     pross[k].join()
                 return 'Q'
-            elif n.upper() == 'Q':
-                return 'Q'
+            elif n == 'S' and len(acc) == 0:
+                print('Please select a account!')
+                time.sleep(1)
+            elif n == 'C' and len(acc) > 0:
+                bbg.append(acc[-1])
+                bbg = sorted(bbg)
+                acc.pop(-1)
+            elif n != 'Q':
+                print('Invalid syntax!')
+                time.sleep(1)
+    return 'Q'
 
 def checkMana(add):
     mana = 0
@@ -890,5 +924,3 @@ def main():
             if (n == 'Q'):
                 select = menu()
     os.system('cls')
-
-#add_account()
