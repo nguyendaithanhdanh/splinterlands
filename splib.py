@@ -57,8 +57,7 @@ def del_account():
                 j += 1
             print('\n[B]ack')
             n = input('Select account to delete: ')
-            if n.isalpha():
-                n = n.upper()
+            if n.isalpha(): n = n.upper()
             if (n.isdigit() and int(n) - 1 < len(all_acc) and int(n) - 1 >= 0):
                 all_acc.pop(int(n)-1)
                 with open(acc_path, 'w') as file:
@@ -84,8 +83,7 @@ def select_account():
             j += 1
         print('\n[Q]uit')
         n = input('Select: ').upper()
-        if n.isdigit() and int(n) - 1 < len(all_acc) and int(n) - 1 >= 0:
-            return all_acc[n-1]
+        if n.isdigit() and int(n) - 1 < len(all_acc) and int(n) - 1 >= 0: return all_acc[int(n)-1]
         elif n!='Q':
             print('Invalid syntax!')
             time.sleep(1)
@@ -112,18 +110,14 @@ def account_manage():
             n = input('Select: ').upper()
             if n == 'A':
                 add_account()
-            elif n == 'D':
-                del_account()
-            elif n != 'Q':
-                print('Invalid syntax!')
+            elif n == 'D': del_account()
+            elif n != 'Q': print('Invalid syntax!')
         else:
             print('    Account is empty')
             print("\n[A]dd\t\t[Q]uit")
             n = input('Select: ').upper()
-            if n == 'A':
-                add_account()
-            elif n != 'Q':
-                print('Invalid syntax!')
+            if n == 'A': add_account()
+            elif n != 'Q': print('Invalid syntax!')
     return 'Q'
 
 
@@ -179,10 +173,8 @@ def writeHistory(driver, his_path, times):
         me = []
         enemy = []
         for i in range(3,len(btl_log)):
-            if btl_log[i] !='VS':
-                me.append(btl_log[i])
-            else:
-                break
+            if btl_log[i] !='VS': me.append(btl_log[i])
+            else: break
         en_name = ''
         en_rat = ''
         en_gui = ''
@@ -197,10 +189,8 @@ def writeHistory(driver, his_path, times):
         result = btl_log[len(me)+4]
         mode = btl_log[-3]
         mana=btl_log[len(me)+7]
-        if mana == '0':
-            mana=btl_log[len(me)+9]
-        if mana == 'DEC':
-            mana=btl_log[len(me)+10]            
+        if mana == '0': mana=btl_log[len(me)+9]
+        if mana == 'DEC': mana=btl_log[len(me)+10]            
         my_team = {}
         my_team['name'] = btl_log[1]
         my_team['rating'] = btl_log[0]
@@ -212,8 +202,7 @@ def writeHistory(driver, his_path, times):
         enemy_team['guid_name'] = en_gui
         enemy_team['team'] = enemy
         result_ = result[:-3]
-        if result[:-3] != "Battle Lost" and result[:-3] != "Battle Won":
-            result_ = 'Drawn'
+        if result[:-3] != "Battle Lost" and result[:-3] != "Battle Won": result_ = 'Drawn'
         match = {}
         match['mode'] = mode[:-4]
         match['result'] = result_
@@ -279,8 +268,7 @@ def battle(match, acc):
         time.sleep(1)
         mana = driver.find_element_by_css_selector('div.col-md-3:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1)').text
         team = pickTeam(mana)
-        if team == 'None':
-            team = pickranTeam(mana, card)     
+        if team == 'None': team = pickranTeam(mana, card)     
         status('Creating team...')
         driver.execute_script("document.getElementsByClassName('btn btn--create-team')[0].click();")
         #Select card
@@ -307,8 +295,7 @@ def battle(match, acc):
         status('Done')
     time.sleep(3) 
     times_when_smaller_20 = clone_i - check_point
-    if times_when_smaller_20 > 0:
-        writeHistory(driver, his_path, times_when_smaller_20)
+    if times_when_smaller_20 > 0: writeHistory(driver, his_path, times_when_smaller_20)
     driver.quit()
     return 'Q'
 
@@ -322,8 +309,7 @@ def topPick(mana):
         team_enemy = i['enemy_team']['team']
         #print(team_enemy)
         for j in team_enemy:
-            if team.get(j, 'None') == 'None':
-                team[j] = 1
+            if team.get(j, 'None') == 'None': team[j] = 1
             else:
                 x = team[j]
                 x += 1
@@ -359,9 +345,7 @@ def multiBattle():
                     print(f'[{j}] {k["mail"]}')
                     j += 1
                 print('\n[S]tart\t\t[C]lear\t\t[Q]uit')
-                n = input('Select: ')
-                if n.isalpha():
-                    n = n.upper()
+                n = input('Select: ').upper()
                 if n.isdigit() and int(n) - 1 < len(all_acc) and int(n) - 1 >= 0:
                     n = int(n)
                     n -= j
@@ -423,11 +407,9 @@ def inputMana():
 
 def menuOpt(select, team_adding):
     global mana
-    if (select.isalpha()):
-        select = select.upper()
+    if (select.isalpha()): select = select.upper()
     if (select.isdigit()):
-        if(int(select) <= 0 or int(select) > 95):
-            select = ''
+        if(int(select) <= 0 or int(select) > 95): select = ''
     list_options = ['S', 'C', 'Q', 'M', 'D']
     while (not btn(select, list_options) and (not select.isdigit())):
         os.system('cls')
@@ -439,8 +421,7 @@ def menuOpt(select, team_adding):
         print("Invalid syntax! Try again.")
         select = input('Select: ').upper()
         if (select.isdigit()):
-            if(int(select) <= 0 or int(select) > 95):
-                select = ''
+            if(int(select) <= 0 or int(select) > 95): select = ''
     if (select == 'S'):
         os.system('cls')
         if (len(team_adding) == 0):
@@ -508,12 +489,10 @@ def addTeam():
         showList(team_adding)
         print("[S]ave\t\t[C]lear All\t\t[M]ana\t\t[D]elete\t\t[Q]uit edit team\n")
         select = menuOpt(input('Select: '), team_adding)
-        if (select.isdigit()):
-            team_adding.append(list_name[int(select)-1])
+        if (select.isdigit()): team_adding.append(list_name[int(select)-1])
         elif (select == 'S'):
             c = team.get(str(mana), 'NotFound')
-            if (c != 'NotFound'):
-                team[str(mana)].append(team_adding)
+            if (c != 'NotFound'): team[str(mana)].append(team_adding)
             else:
                 team[str(mana)] = []
                 team[str(mana)].append(team_adding)         
@@ -521,14 +500,12 @@ def addTeam():
             with open(team_path, 'w') as file:
                 d = json.dump(team_sorted, file, indent=4)
             team_adding.clear()
-        elif (select == 'C'):
-            team_adding.clear()
+        elif (select == 'C'): team_adding.clear()
         elif (select == 'M'):
             os.system('cls')
             mana = inputMana()
         elif (select == 'D'):
-            if len(team_adding) > 0:
-                team_adding.pop(-1)
+            if len(team_adding) > 0: team_adding.pop(-1)
         print(team_adding)
     return select
 
@@ -548,12 +525,9 @@ def kpi(his_path, mana, team):
     if history.get(mana, 'None') != 'None':
         for i in range(len(history[mana])):
             if history[mana][i]['my_team']['team'] == team:
-                if history[mana][i]['result'] == 'Battle Won':
-                    won += 1
-                if history[mana][i]['result'] == 'Battle Lost':
-                    lost += 1
-                if history[mana][i]['result'] == 'Drawn':
-                    drawn += 1
+                if history[mana][i]['result'] == 'Battle Won': won += 1
+                if history[mana][i]['result'] == 'Battle Lost': lost += 1
+                if history[mana][i]['result'] == 'Drawn': drawn += 1
         match = won + lost + drawn
     return [won, lost, drawn, match]
 
@@ -579,7 +553,7 @@ def analys(mana):
             b = team[mana][te]
             kp = kpi(his_path, mana, b)
             os.system('cls')
-            print(f'Team: {b}')
+            print(f'Team: {", ".join(b)}')
             print(f"\nIn {kp[3]} match:")
             print(f'    Won: {kp[0]}')
             print(f'    Lost: {kp[1]}')
@@ -590,8 +564,7 @@ def analys(mana):
                     if history[mana][i]['my_team']['team'] == b:
                         rsl = history[mana][i]['result']
                         x = rsl[7:]
-                        if x != 'Won' and x!='Lost':
-                            x = "Drawn"
+                        if x != 'Won' and x!='Lost': x = "Drawn"
                         print(f'> {x:<4}', end=": ")
                         print('[', end="")
                         print(", ".join(history[mana][i]['enemy_team']['team']), end="")
@@ -607,8 +580,7 @@ def analys(mana):
                 os.system('cls')
                 print('Invalid syntax!')
                 n = input('\n[B]ack\t[R]eturn View team\nSelect: ').upper()
-            if n == 'R':
-                te = 'B'
+            if n == 'R': te = 'B'
         elif te != 'B':
             print('Invalid syntax!')
             time.sleep(1)
@@ -627,23 +599,19 @@ def viewTeam():
             for j in team[i]:
                 kp = kpi(his_path, i, j)
                 percent = 0.0
-                if kp[3] != 0:
-                    percent = int(kp[0]) / int(kp[3]) *100
+                if kp[3] != 0: percent = int(kp[0]) / int(kp[3]) *100
                 p = ", ".join(j)
                 print(f'{k}. {p}')
-                print(f'   --> Won: {kp[0]}  /  Lost: {kp[1]}  /  Drawn: {kp[2]} | in {kp[3]} match | Win rate {percent}%')
+                print(f'   --> Won: {kp[0]}  /  Lost: {kp[1]}  /  Drawn: {kp[2]} | in {kp[3]} match | Win rate {round(percent, 2)}%')
                 k += 1
                 print()
         print('_'*120)
         print('\nEnter mana to view details')
         print('\n[A]dd team\t\t[D]elete team\t\t[Q]uit')
         n = input('\nSelect: ').upper()
-        if n == 'A':
-            addTeam()
-        elif n == 'D':
-            delTeam()
-        elif n.isdigit() and (team.get(n, 'Non') != 'Non'):
-            analys(n)
+        if n == 'A': addTeam()
+        elif n == 'D': delTeam()
+        elif n.isdigit() and (team.get(n, 'Non') != 'Non'): analys(n)
         elif n != 'Q':
             print('Invalid syntax!')
             time.sleep(1)
@@ -691,8 +659,7 @@ def delTeam():
         acpt = input(f'Team selected:\n{st}\n\nDo you want delete this team? [Y/N]\nSelect: ').upper()
     if acpt == 'Y':
         list_team[x].pop(int(td)-1)
-        if len(list_team[x]) == 0:
-            list_team.pop(x)
+        if len(list_team[x]) == 0: list_team.pop(x)
         with open(team_path, 'w') as file:
             b = json.dump(list_team, file, indent=4)
         os.system('cls')
@@ -700,8 +667,7 @@ def delTeam():
         time.sleep(1)
 
 def ranTeam(team):
-    if len(team) == 1:
-        return team[0]
+    if len(team) == 1: return team[0]
     else:
         a = random.randrange(0,len(team))
         return team[a]
@@ -710,10 +676,8 @@ def pickTeam(x):
     with open(team_path) as json_file:
         team = json.load(json_file)
         t = team.get(str(x), "None")
-    if t != 'None':
-        return ranTeam(t)
-    else:
-        return t
+    if t != 'None': return ranTeam(t)
+    else: return t
 
 def createCard():
     with open(src_web_path, mode="r", encoding="utf-8") as fp:
@@ -787,8 +751,7 @@ def check_update():
             return 'OK'
 
 def btn(x,li):
-    if (x.isalpha()):
-        x = x.upper()
+    if (x.isalpha()): x = x.upper()
     check = False
     for i in li:
         if x == i:
@@ -824,8 +787,7 @@ bruhh="""
 def main():
     select = ''
     upd = check_update()
-    if upd == 'OK':
-        select = 'Q'
+    if upd == 'OK': select = 'Q'
     else:
         select = menu()
     while (select != 'Q'):
@@ -837,22 +799,16 @@ def main():
                 print(f'Selected: {acc["mail"]}')
                 match = input('Number of match: ')
                 n = battle(match, acc)
-                if (n == 'Q'):
-                    select = menu()
-            else:
-                select = menu()
+                if (n == 'Q'): select = menu()
+            else: select = menu()
         elif (select == '2'):
             n = multiBattle()
-            if (n == 'Q'):
-                select = menu()
+            if (n == 'Q'): select = menu()
         elif (select == '3'):
             n = viewTeam()
-            if (n == 'Q'):
-                select = menu()
-            elif (n== 'R'):
-                select == '3'
+            if (n == 'Q'): select = menu()
+            elif (n== 'R'): select == '3'
         elif (select == '4'):
             n = account_manage()
-            if (n == 'Q'):
-                select = menu()
+            if (n == 'Q'): select = menu()
     os.system('cls')
