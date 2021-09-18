@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 import multiprocessing
 import getpass, time, io, json, random, os, requests, update, re
 
-version = '1.7.7'
+version = '1.7.8'
 username = getpass.getuser()
 usr_path=('C:/Users/', username, '/AppData/Local/Google/Chrome/User Data')
 filePath = ''.join(usr_path)
@@ -315,10 +315,11 @@ def topPick(mana):
                 x += 1
                 team[j] = x
     items_sorted = sorted(team.items(), reverse=True, key = lambda x : x[1])
+    print(f'{"Name Card":>12}{"Times":>16}\n')
+    j = 1
     for i in items_sorted:
-        print(f'{i[0]:>20}: {i[1]:>2} time(s)')
-
-
+        print(f'{j:>2} {i[0]:<20} {i[1]:>2}')
+        j += 1
 def multiBattle():
     try:
         with open(acc_path) as json_file:
@@ -592,6 +593,7 @@ def viewTeam():
         os.system('cls')
         with open(team_path) as json_file:
             team = json.load(json_file)
+            json_file.close()
         for i in team:
             print('_'*120)
             print(f'\n MANA {i}:')
@@ -602,7 +604,7 @@ def viewTeam():
                 if kp[3] != 0: percent = int(kp[0]) / int(kp[3]) *100
                 p = ", ".join(j)
                 print(f'{k}. {p}')
-                print(f'   --> Won: {kp[0]}  /  Lost: {kp[1]}  /  Drawn: {kp[2]} | in {kp[3]} match | Win rate {round(percent, 2)}%')
+                print(f'   --> W: {kp[0]}  /  L: {kp[1]}  /  D: {kp[2]} | in {kp[3]} match | Win Rate {round(percent, 2)}%')
                 k += 1
                 print()
         print('_'*120)
@@ -692,6 +694,40 @@ def createCard():
     with open(card_path, 'w') as file:
         b = json.dump(card, file, indent=4)
 
+def addCard():
+    with open('./data/card.json') as file:
+        card = json.load(file)
+        file.close()
+    name = input('Name Card: ')
+    card[name] = {}
+    card[name]['level'] = int(input('Level: '))
+    card[name]['mana'] = int(input('Mana: '))
+    with open(card_path, 'w') as file:
+        b = json.dump(card, file, indent=4)
+
+def showCard():
+    n = ''
+    while(n != 'Q'):
+        with open('./data/card.json') as file:
+            card = json.load(file)
+            file.close()
+        print(f'{"Name":>8} {"Level":>16} {"Mana":>5}\n')
+        x = 0
+        for i in card:
+            level = card[i]['level']
+            mana = card[i]['mana']
+            print(f"{i:<21} {level:<5} {mana}")
+            x += 1
+        print('_'*30)
+        print(f'Total: {x} card')
+        print('\n[A]dd card\t\t[Q]uit')
+        n = input('Select: ').upper()
+        if n.isalpha() and n == 'A': addCard()
+        elif n != 'Q':
+            print('Invalid syntax!')
+            time.sleep(1)
+    return 'Q'
+
 logo = '''
 \t\t\t\t\t░██████╗██████╗░██╗░░░░░██╗██████╗░
 \t\t\t\t\t██╔════╝██╔══██╗██║░░░░░██║██╔══██╗
@@ -704,14 +740,14 @@ def menu():
     os.system('cls')
     print(logo)
     print(f"\t\t\t\t\t\t    Version {version}")
-    print('\n[1] Run Game\n[2] Run Game with Multi-account\n[3] Manage Team\n[4] Manage Account\n\n[Q]uit')
+    print('\n[1] Run Game\n[2] Run Game with Multi-account\n[3] Manage Team\n[4] Manage Account\n[5] Manage Card\n\n[Q]uit')
     select = input('\nSelect: ').upper()
-    list_op = ['1', '2', '3', '4', 'Q']
+    list_op = ['1', '2', '3', '4', '5', 'Q']
     while (not btn(select, list_op)):
         os.system('cls')
         print(logo)
         print(f"\t\t\t\t\t\t    Version {version}")
-        print('\n[1] Run Game\n[2] Run Game with Multi-account\n[3] Manage Team\n[4] Manage Account\n\n[Q]uit')
+        print('\n[1] Run Game\n[2] Run Game with Multi-account\n[3] Manage Team\n[4] Manage Account\n[5] Manage Card\n\n[Q]uit')
         print("Invalid syntax! Try again.")
         select = input('\nSelect: ').upper()
     return select
@@ -811,4 +847,8 @@ def main():
         elif (select == '4'):
             n = account_manage()
             if (n == 'Q'): select = menu()
+        elif (select == '5'):
+            n = showCard()
+            if (n == 'Q'): select = menu()
+
     os.system('cls')
