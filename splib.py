@@ -10,7 +10,7 @@ import getpass, time, io, json, random, os, requests, update, re
 import pickle
 
 
-version = '1.7.6'
+version = '1.7.5'
 username = getpass.getuser()
 usr_path=('C:/Users/', username, '/AppData/Local/Google/Chrome/User Data')
 filePath = ''.join(usr_path)
@@ -908,8 +908,6 @@ def main():
             os.system('cls')
             print(f'Selected: {acc["mail"]}')
             match = input('Number of match: ')
-            with open(acc_path) as json_file:
-                acc = json.load(json_file)
             n = battle(match, acc)
             if (n == 'Q'):
                 select = menu()
