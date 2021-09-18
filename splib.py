@@ -10,7 +10,7 @@ import getpass, time, io, json, random, os, requests, update, re
 import pickle
 
 
-version = '1.7.5'
+version = '1.7.6'
 username = getpass.getuser()
 usr_path=('C:/Users/', username, '/AppData/Local/Google/Chrome/User Data')
 filePath = ''.join(usr_path)
@@ -61,22 +61,25 @@ def del_account():
         with open(acc_path) as json_file:
             all_acc = json.load(json_file)
             json_file.close()
-        j = 1
-        for i in all_acc:
-            print(f'[{j}] {i["mail"]}')
-            j += 1
-        print('\n[B]ack')
-        n = input('Select account to delete: ')
-        if n.isalpha():
-            n = n.upper()
-        if (n.isdigit() and int(n) - 1 < len(all_acc) and int(n) - 1 >= 0):
-            all_acc.pop(int(n)-1)
-            with open(acc_path, 'w') as file:
-                d = json.dump(all_acc, file, indent=4)
-                file.close()
-        elif n != 'B':
-            print('Invalid syntax!')
-            time.sleep(1)
+        if len(all_acc) > 0:
+            j = 1
+            for i in all_acc:
+                print(f'[{j}] {i["mail"]}')
+                j += 1
+            print('\n[B]ack')
+            n = input('Select account to delete: ')
+            if n.isalpha():
+                n = n.upper()
+            if (n.isdigit() and int(n) - 1 < len(all_acc) and int(n) - 1 >= 0):
+                all_acc.pop(int(n)-1)
+                with open(acc_path, 'w') as file:
+                    d = json.dump(all_acc, file, indent=4)
+                    file.close()
+            elif n != 'B':
+                print('Invalid syntax!')
+                time.sleep(1)
+        else:
+            n = 'B'
 
 def select_account():
     with open(acc_path) as json_file:
@@ -329,61 +332,70 @@ def battle(match, acc):
 
 
 def multiBattle():
-    with open(acc_path) as json_file:
-        all_acc = json.load(json_file)
-        json_file.close()
-    bbg=[]
-    for dos in all_acc:
-        bbg.append(dos['mail'])
-    bbg = sorted(bbg)
+    try:
+        with open(acc_path) as json_file:
+            all_acc = json.load(json_file)
+            json_file.close()
+    except Exception as e:
+        all_acc = []
     acc = []
-    n = ''
-    while (n != 'Q'):
-    #for i in range(len(all_acc)+1):
-        os.system('cls')
-        print("    SELECT ACCOUNT")
-        print(f'\n\n  Selected {len(acc)} account')
-        if len(acc) > 0:
-            t = 1
-            for z in acc:
-                print(f"{t}. {z}")
-                t += 1
-        print('_'*20)
-        if len(bbg) >= 0:
-            j = 1
-            for k in bbg:
-                print(f'[{j}] {k}')
-                j += 1
-            print('\n[S]tart\t\t[C]lear\t\t[Q]uit')
-            n = input('Select: ')
-            if n.isalpha():
-                n = n.upper()
-            if n.isdigit() and int(n) - 1 < len(bbg) and int(n) - 1 >= 0:
-                n = int(n)
-                n -= j
-                acc.append(bbg[n])
-                bbg.pop(n)
-            elif n == 'S' and len(acc) > 0:
-                os.system('cls')
-                match = input('Number of match: ')
-                pross = {}
-                for i in range(len(acc)):
-                    keys = 'p' + str(i+1)
-                    pross[keys] = multiprocessing.Process(target=battle, args=(match, acc[i]))
-                
-                for b in pross:
-                    pross[b].start()
-                for k in pross:
-                    pross[k].join()
-                return 'Q'
-            elif n == 'S' and len(acc) == 0:
-                print('Please select a account!')
-                time.sleep(1)
-            elif n == 'C' and len(acc) > 0:
-                bbg.append(acc[-1])
-                bbg = sorted(bbg)
-                acc.pop(-1)
-            elif n != 'Q':
+    if len(all_acc) > 0:
+        n = ''
+        while (n != 'Q'):
+            os.system('cls')
+            print("    SELECT ACCOUNT")
+            print(f'\n\n  Selected {len(acc)} account')
+            if len(acc) > 0:
+                t = 1
+                for z in acc:
+                    print(f"{t}. {z['mail']}")
+                    t += 1
+            print('_'*20)
+            if len(all_acc) >= 0:
+                j = 1
+                for k in all_acc:
+                    print(f'[{j}] {k["mail"]}')
+                    j += 1
+                print('\n[S]tart\t\t[C]lear\t\t[Q]uit')
+                n = input('Select: ')
+                if n.isalpha():
+                    n = n.upper()
+                if n.isdigit() and int(n) - 1 < len(all_acc) and int(n) - 1 >= 0:
+                    n = int(n)
+                    n -= j
+                    acc.append(all_acc[n])
+                    all_acc.pop(n)
+                elif n == 'S' and len(acc) > 0:
+                    os.system('cls')
+                    match = input('Number of match: ')
+                    pross = {}
+                    for i in range(len(acc)):
+                        keys = 'p' + str(i+1)
+                        pross[keys] = multiprocessing.Process(target=battle, args=(match, acc[i]))
+                    
+                    for b in pross:
+                        pross[b].start()
+                    for k in pross:
+                        pross[k].join()
+                    return 'Q'
+                elif n == 'S' and len(acc) == 0:
+                    print('Please select a account!')
+                    time.sleep(1)
+                elif n == 'C' and len(acc) > 0:
+                    all_acc.append(acc[-1])
+                    acc.pop(-1)
+                elif n != 'Q':
+                    print('Invalid syntax!')
+                    time.sleep(1)
+    else:
+        m = ''
+        while(m!='Q'):
+            os.system('cls')
+            print("    SELECT ACCOUNT")
+            print('\n    Account is empty')
+            print('\n[Q]uit')
+            m = input('Select: ').upper()
+            if m!= 'Q':
                 print('Invalid syntax!')
                 time.sleep(1)
     return 'Q'
