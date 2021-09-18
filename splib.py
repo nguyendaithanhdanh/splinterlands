@@ -6,7 +6,6 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.expected_conditions import presence_of_element_located
 from bs4 import BeautifulSoup
 import multiprocessing
-#from selenium.webdriver.remote.command import Command
 import getpass, time, io, json, random, os, requests, update, re
 import pickle
 
@@ -819,7 +818,7 @@ def check_update():
     global version
     print('Checking Update...')
     response = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/version')
-    new_version = response.text[:3]
+    new_version = response.text[:5]
     if(version != new_version):
         os.system('cls')
         print(bruhh)
