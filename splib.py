@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 import multiprocessing
 import getpass, time, io, json, random, os, requests, update, re
 
-version = '1.7.8'
+version = '1.8.0'
 username = getpass.getuser()
 usr_path=('C:/Users/', username, '/AppData/Local/Google/Chrome/User Data')
 filePath = ''.join(usr_path)
@@ -18,13 +18,6 @@ src_web_path = './data/source_web.html'
 color_path = './data/color_card.json'
 acc_path = './data/account.json'
 his_path = './data/history.json'
-
-with open(card_path) as json_file:
-    card = json.load(json_file)
-list_card_name = []
-for i in card:
-    list_card_name.append(i)
-list_name = sorted(list_card_name)
 mana = 0
 
 def add_account():
@@ -397,7 +390,6 @@ def saveFile(filePath, content):
     f.write(content)
     f.close()
 
-
 def inputMana():
     mana = input('Mana: ')
     while(not mana.isdigit()):
@@ -436,6 +428,12 @@ def menuOpt(select, team_adding):
     return select
 
 def showListName():
+    with open(card_path) as json_file:
+        card = json.load(json_file)
+    list_card_name = []
+    for i in card:
+        list_card_name.append(i)
+    list_name = sorted(list_card_name)
     n = 0
     a = []
     num = []
@@ -586,7 +584,6 @@ def analys(mana):
             print('Invalid syntax!')
             time.sleep(1)
 
-
 def viewTeam():
     n =''
     while (n != 'Q'):
@@ -695,34 +692,119 @@ def createCard():
         b = json.dump(card, file, indent=4)
 
 def addCard():
-    with open('./data/card.json') as file:
-        card = json.load(file)
-        file.close()
-    name = input('Name Card: ')
-    card[name] = {}
-    card[name]['level'] = int(input('Level: '))
-    card[name]['mana'] = int(input('Mana: '))
-    with open(card_path, 'w') as file:
-        b = json.dump(card, file, indent=4)
+    n = ''
+    while (n != 'Q'):
+        os.system('cls')
+        with open('./data/card.json') as file:
+            card = json.load(file)
+            file.close()
+        print('Enter Infomation Card')
+        print('[Q]uit\n')
+        n = input('Name Card: ')
+        if n.upper() == 'Q': break
+        else: name = n
+        card[name]= {}
+
+        n = input('Level: ')
+        if n.upper() == 'Q': break
+        elif n.isdigit(): card[name]['level'] = int(n)
+        else: card[name]['level'] = 0
+
+        if card[name]['level'] != 0:
+            n = input('Mana: ')
+            if n.upper() == 'Q': break
+            elif n.isdigit(): card[name]['mana'] = int(n)
+            else: card[name]['mana'] = 0
+        else: card[name]['mana'] = 0
+
+        if card[name]['mana'] != 0:
+            with open(card_path, 'w') as file:
+                b = json.dump(card, file, indent=4)
+                n = 'Q'
+        else:
+            print('Invalid information')
+            time.sleep(1)
+            n = ''
+def removeCard():
+    n = ''
+    while(n != 'Q'):
+        os.system('cls')
+        with open('./data/card.json') as file:
+            card = json.load(file)
+            file.close()
+        list_card_name = []
+        for i in card:
+            list_card_name.append(i)
+            list_name = sorted(list_card_name)
+        for i in range(len(list_name)):
+            name = list_name[i]
+            print(f"{i+1:>2} {name:<25}")
+        print('_'*30)
+        print('\nEnter a number to delete')
+        print('[Q]uit\n')
+        n = input('Select: ').upper()
+        if n.isdigit() and int(n) - 1 < len(card) and int(n) - 1 >= 0:
+            name = list_name[int(n)-1]
+            del card[name]
+            with open(card_path, 'w') as file:
+                b = json.dump(card, file, indent=4)
+                file.close()
+            n = 'Q'
+        elif n != 'Q':
+            print('Invalid syntax!')
+            time.sleep(1)
+
 
 def showCard():
     n = ''
     while(n != 'Q'):
+        os.system('cls')
         with open('./data/card.json') as file:
             card = json.load(file)
             file.close()
-        print(f'{"Name":>8} {"Level":>16} {"Mana":>5}\n')
-        x = 0
+        with open('./data/color_card.json') as file:
+            color = json.load(file)
+            file.close()
+        with open('./data/team.json') as file:
+            team_raw = json.load(file)
+            file.close()
+        list_card_name = []
         for i in card:
-            level = card[i]['level']
-            mana = card[i]['mana']
-            print(f"{i:<21} {level:<5} {mana}")
+            list_card_name.append(i)
+            list_name = sorted(list_card_name)
+        print(f'   {"Name":>11} {"Mana":>15} {"Level":>10} {"Color":>11}{"Team":>20}\n')
+        x = 0
+        for i in range(len(list_name)):
+            name = list_name[i]
+            mana = card.get(name)['mana']
+            level = card.get(name)['level']
+            color_card = ''
+            for j in color:
+                try:
+                    color[j].index(name)
+                    color_card = j
+                    break
+                except Exception as e:
+                    color_card = 'N/A'
+            team_ = []
+            team = ''
+            for j in team_raw:
+                for k in team_raw[j]:
+                    try:
+                        k.index(name)
+                        team_.append(j)
+                        break
+                    except Exception as e:
+                        team = 'No Team'
+            if len(team_) > 0: team = ', '.join(team_)
+            print(f"{i+1:>2} {name:<25}{mana:<10}{level:<10}{color_card:<10}{team:<40}")
             x += 1
         print('_'*30)
         print(f'Total: {x} card')
-        print('\n[A]dd card\t\t[Q]uit')
+        print('\n[A]dd card\t\t[D]elete\t\t[Q]uit')
         n = input('Select: ').upper()
         if n.isalpha() and n == 'A': addCard()
+        elif n.isalpha() and n == 'D': removeCard()
         elif n != 'Q':
             print('Invalid syntax!')
             time.sleep(1)
@@ -736,6 +818,7 @@ logo = '''
 \t\t\t\t\t██████╔╝██║░░░░░███████╗██║██████╦╝
 \t\t\t\t\t╚═════╝░╚═╝░░░░░╚══════╝╚═╝╚═════╝░
 '''
+
 def menu():
     os.system('cls')
     print(logo)
@@ -850,5 +933,4 @@ def main():
         elif (select == '5'):
             n = showCard()
             if (n == 'Q'): select = menu()
-
     os.system('cls')
