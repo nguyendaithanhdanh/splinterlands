@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 import multiprocessing
 import getpass, time, io, json, random, os, requests, update, re
 
-version = '1.8.0'
+version = '1.8.1'
 username = getpass.getuser()
 usr_path=('C:/Users/', username, '/AppData/Local/Google/Chrome/User Data')
 filePath = ''.join(usr_path)
@@ -509,6 +509,13 @@ def addTeam():
     return select
 
 def list_name_dict():
+    with open('./data/card.json') as file:
+        card = json.load(file)
+        file.close()
+    list_card_name = []
+    for i in card:
+        list_card_name.append(i)
+        list_name = sorted(list_card_name)
     lname = {}
     for i in range(1, len(list_name)+1):
         lname[list_name[i-1]] = str(i)
