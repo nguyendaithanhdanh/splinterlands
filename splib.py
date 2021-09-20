@@ -1,4 +1,4 @@
-from selenium import webdriver
+\from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -380,6 +380,9 @@ def multiBattle():
     return 'Q'
 
 def checkMana(add):
+    with open('./data/card.json') as file:
+        card = json.load(file)
+        file.close()
     mana = 0
     for i in add:
         mana += card[i]['mana']
@@ -474,6 +477,13 @@ def teamSorted(team):
 
 def addTeam():
     os.system('cls')
+    with open('./data/card.json') as file:
+        card = json.load(file)
+        file.close()
+    list_card_name = []
+    for i in card:
+        list_card_name.append(i)
+        list_name = sorted(list_card_name)
     team_adding = []
     global mana
     mana = inputMana()
