@@ -869,13 +869,11 @@ def check_update():
     new_version = response.text[:5]
     if(version != new_version):
         os.system('cls')
-        print(bruhh)
-        cf = input(f'  New Update! Version {new_version}\n  Do you want Update? [Y/N]').upper()
+        cf = input(f'New Update! Version {new_version}\nDo you want Update? [Y/N]').upper()
         while(cf != 'Y' and cf != 'N'):
             os.system('cls')
-            print(bruhh)
-            print("  Invalid syntax! Try again.")
-            cf = input(f'  New Update! Version {new_version}\n  Do you want Update? [Y/N]').upper()
+            print("Invalid syntax! Try again.")
+            cf = input(f'  New Update! Version {new_version}\nDo you want Update? [Y/N]').upper()
         if (cf == 'Y'):
             os.system('cls')
             print('Updating...')
@@ -893,32 +891,7 @@ def btn(x,li):
         if x == i:
             check = True
             break   
-    return check        
-
-bruhh="""
-                                            ───────▄▀▀▀▀▀▀▀▀▀▀▄▄
-                                            ────▄▀▀░░░░░░░░░░░░░▀▄
-                                            ──▄▀░░░░░░░░░░░░░░░░░░▀▄
-                                            ──█░░░░░░░░░░░░░░░░░░░░░▀▄
-                                            ─▐▌░░░░░░░░▄▄▄▄▄▄▄░░░░░░░▐▌
-                                            ─█░░░░░░░░░░░▄▄▄▄░░▀▀▀▀▀░░█
-                                            ▐▌░░░░░░░▀▀▀▀░░░░░▀▀▀▀▀░░░▐▌
-                                            █░░░░░░░░░▄▄▀▀▀▀▀░░░░▀▀▀▀▄░█
-                                            █░░░░░░░░░░░░░░░░▀░░░▐░░░░░▐▌
-                                            ▐▌░░░░░░░░░▐▀▀██▄░░░░░░▄▄▄░▐▌
-                                            ─█░░░░░░░░░░░▀▀▀░░░░░░▀▀██░░█
-                                            ─▐▌░░░░▄░░░░░░░░░░░░░▌░░░░░░█
-                                            ──▐▌░░▐░░░░░░░░░░░░░░▀▄░░░░░█
-                                            ───█░░░▌░░░░░░░░▐▀░░░░▄▀░░░▐▌
-                                            ───▐▌░░▀▄░░░░░░░░▀░▀░▀▀░░░▄▀
-                                            ───▐▌░░▐▀▄░░░░░░░░░░░░░░░░█
-                                            ───▐▌░░░▌░▀▄░░░░▀▀▀▀▀▀░░░█
-                                            ───█░░░▀░░░░▀▄░░░░░░░░░░▄▀
-                                            ──▐▌░░░░░░░░░░▀▄░░░░░░▄▀
-                                            ─▄▀░░░▄▀░░░░░░░░▀▀▀▀█▀
-                                            ▀░░░▄▀░░░░░░░░░░▀░░░▀▀▀▀▄▄▄▄▄
-
-"""
+    return check
 
 def main():
     select = ''
