@@ -24,6 +24,7 @@ def add_account():
     try:
         with open(acc_path) as json_file:
             all_acc = json.load(json_file)
+            json_file.close()
     except Exception as e:
         all_acc = [] 
     acc = {}
@@ -35,6 +36,7 @@ def add_account():
     all_acc.append(acc)
     with open(acc_path, 'w') as file:
         d = json.dump(all_acc, file, indent=4)
+        file.close()
 
 def del_account():
     n = ''
@@ -66,27 +68,39 @@ def select_account():
     n = ''
     while(n != 'Q'):
         os.system('cls')
-        print('    SELECT ACCOUNT')
-        with open(acc_path) as json_file:
-            all_acc = json.load(json_file)
-            json_file.close()
-        j = 1
-        for i in all_acc:
-            print(f'[{j}] {i["mail"]}')
-            j += 1
-        print('\n[Q]uit')
-        n = input('Select: ').upper()
-        if n.isdigit() and int(n) - 1 < len(all_acc) and int(n) - 1 >= 0: return all_acc[int(n)-1]
-        elif n!='Q':
-            print('Invalid syntax!')
-            time.sleep(1)
+        print('SELECT ACCOUNT\n')
+        try:
+            with open(acc_path) as json_file:
+                all_acc = json.load(json_file)
+                json_file.close()
+        except Exception as e:
+            all_acc = []
+        if len(all_acc) > 0:
+            j = 1
+            for i in all_acc:
+                print(f'[{j}] {i["mail"]}')
+                j += 1
+            print('\n[Q]uit')
+            n = input('Select: ').upper()
+            if n.isdigit() and int(n) - 1 < len(all_acc) and int(n) - 1 >= 0: return all_acc[int(n)-1]
+            elif n!='Q':
+                print('Invalid syntax!')
+                time.sleep(1)
+        else:
+            print("No account, please add an account!")
+            print('\n[Q]uit')
+            n = input('Select: ').upper()
+            if n!='Q':
+                print('Invalid syntax!')
+                time.sleep(1)
+
     return 'Q'
 
 def account_manage():
     n = ''
     while(n != 'Q'):
         os.system('cls')
-        print('\tACCOUNT LIST\n')
+        print('ACCOUNT LIST\n')
         try:
             with open(acc_path) as json_file:
                 all_acc = json.load(json_file)
@@ -104,19 +118,24 @@ def account_manage():
             if n == 'A':
                 add_account()
             elif n == 'D': del_account()
-            elif n != 'Q': print('Invalid syntax!')
+            elif n != 'Q':
+                print('Invalid syntax!')
+                time.sleep(1)
         else:
-            print('    Account is empty')
+            print("No account, please add an account!")
             print("\n[A]dd\t\t[Q]uit")
             n = input('Select: ').upper()
             if n == 'A': add_account()
-            elif n != 'Q': print('Invalid syntax!')
+            elif n != 'Q':
+                print('Invalid syntax!')
+                time.sleep(1)
     return 'Q'
 
 
 def tme():
     with open(team_path) as json_file:
         team = json.load(json_file)
+        json_file.close()
     return team
 
 
@@ -134,6 +153,7 @@ def getProf_Firefox():
 def pickranTeam(mana, card_path):
     with open(color_path) as json_file:
         color = json.load(json_file)
+        json_file.close()
     count_mana = 0
     lst_color = list(color.keys())
     list_name = []
@@ -325,8 +345,8 @@ def multiBattle():
         n = ''
         while (n != 'Q'):
             os.system('cls')
-            print("    SELECT ACCOUNT")
-            print(f'\n\n  Selected {len(acc)} account')
+            print("SELECT ACCOUNT")
+            print(f'\nSelected {len(acc)} account')
             if len(acc) > 0:
                 t = 1
                 for z in acc:
@@ -370,8 +390,8 @@ def multiBattle():
         m = ''
         while(m!='Q'):
             os.system('cls')
-            print("    SELECT ACCOUNT")
-            print('\n    Account is empty')
+            print("SELECT ACCOUNT")
+            print("\nNo account, please add an account!")
             print('\n[Q]uit')
             m = input('Select: ').upper()
             if m!= 'Q':
@@ -433,6 +453,7 @@ def menuOpt(select, team_adding):
 def showListName():
     with open(card_path) as json_file:
         card = json.load(json_file)
+        json_file.close()
     list_card_name = []
     for i in card:
         list_card_name.append(i)
@@ -489,8 +510,12 @@ def addTeam():
     mana = inputMana()
     select=''
     while (select != 'Q'):
-        with open(team_path) as file:
-            team = json.load(file)
+        try:
+            with open(team_path) as file:
+                team = json.load(file)
+                file.close()
+        except Exception as e:
+            team = {}
         os.system('cls')
         showListName()
         print("\n")
@@ -508,6 +533,7 @@ def addTeam():
             team_sorted = teamSorted(team)
             with open(team_path, 'w') as file:
                 d = json.dump(team_sorted, file, indent=4)
+                file.close()
             team_adding.clear()
         elif (select == 'C'): team_adding.clear()
         elif (select == 'M'):
@@ -532,105 +558,160 @@ def list_name_dict():
     return lname 
 
 def kpi(his_path, mana, team):
-    with open(his_path) as json_file:
-        history = json.load(json_file)
-    won = 0
-    lost = 0
-    drawn = 0
-    match = 0
-    if history.get(mana, 'None') != 'None':
-        for i in range(len(history[mana])):
-            if history[mana][i]['my_team']['team'] == team:
-                if history[mana][i]['result'] == 'Battle Won': won += 1
-                if history[mana][i]['result'] == 'Battle Lost': lost += 1
-                if history[mana][i]['result'] == 'Drawn': drawn += 1
-        match = won + lost + drawn
-    return [won, lost, drawn, match]
+    try:
+        with open(his_path) as json_file:
+            history = json.load(json_file)
+            json_file.close()
+    except Exception as e:
+        history = {}
+    if len(history) > 0:
+        won = 0
+        lost = 0
+        drawn = 0
+        match = 0
+        if history.get(mana, 'None') != 'None':
+            for i in range(len(history[mana])):
+                if history[mana][i]['my_team']['team'] == team:
+                    if history[mana][i]['result'] == 'Battle Won': won += 1
+                    if history[mana][i]['result'] == 'Battle Lost': lost += 1
+                    if history[mana][i]['result'] == 'Drawn': drawn += 1
+            match = won + lost + drawn
+        return [won, lost, drawn, match]
+    else: return [0, 0, 0, 0]
 
 def analys(mana):
-    with open(his_path) as json_file:
-        history = json.load(json_file)
+    try:
+        with open(his_path) as json_file:
+            history = json.load(json_file)
+            json_file.close()
+    except Exception as e:
+        history = {}
     with open(team_path) as json_file:
         team = json.load(json_file)
+        json_file.close()
     te = ''
-    while (te != 'B'):
-        os.system('cls')
-        topPick(mana)
-        print('_'*100)
-        print()
-        j = 1
-        for i in team[mana]:
-            print(f'[{j}] {", ".join(i)}')
-            j += 1
-        print('\n[B]ack')
-        te = input('Select team: ').upper()
-        if te.isdigit() and (int(te) - 1 >= 0 and int(te) - 1 < len(team[mana])):
-            te = int(te) - 1
-            b = team[mana][te]
-            kp = kpi(his_path, mana, b)
+    if len(history) > 0:
+        while (te != 'B'):
             os.system('cls')
-            print(f'Team: {", ".join(b)}')
-            print(f"\nIn {kp[3]} match:")
-            print(f'    Won: {kp[0]}')
-            print(f'    Lost: {kp[1]}')
-            print(f'    Drawn: {kp[2]}')        
-            if kp[3] != 0:
-                print('\n\t\t\t\t\t\tHISTORY ENEMY TEAM\n')
-                for i in range(len(history[mana])):
-                    if history[mana][i]['my_team']['team'] == b:
-                        rsl = history[mana][i]['result']
-                        x = rsl[7:]
-                        if x != 'Won' and x!='Lost': x = "Drawn"
-                        print(f'> {x:<4}', end=": ")
-                        print('[', end="")
-                        print(", ".join(history[mana][i]['enemy_team']['team']), end="")
-                        print(']')
-                        xx = []
-                        pp = list_name_dict()
-                        for k in history[mana][i]['enemy_team']['team']:
-                            xx.append(str(pp.get(k)))
-                        num = " / ".join(xx)
-                        print(f'Number [{num}]\n')
-            n = input('\n[B]ack\t[R]eturn View team\nSelect: ').upper()
-            while(n!='R' and n!='B'):
+            topPick(mana)
+            print('_'*100)
+            print()
+            print("Select team to view details\n")
+            j = 1
+            for i in team[mana]:
+                print(f'[{j}] {", ".join(i)}')
+                j += 1
+            print('\n[B]ack')
+            te = input('Select team: ').upper()
+            if te.isdigit() and (int(te) - 1 >= 0 and int(te) - 1 < len(team[mana])):
+                te = int(te) - 1
+                b = team[mana][te]
+                kp = kpi(his_path, mana, b)
                 os.system('cls')
-                print('Invalid syntax!')
+                print(f'Team: {", ".join(b)}')
+                print(f"\nIn {kp[3]} match:")
+                print(f'    Won: {kp[0]}')
+                print(f'    Lost: {kp[1]}')
+                print(f'    Drawn: {kp[2]}')        
+                if kp[3] != 0:
+                    print('\n\t\t\t\t\t\tHISTORY ENEMY TEAM\n')
+                    for i in range(len(history[mana])):
+                        if history[mana][i]['my_team']['team'] == b:
+                            rsl = history[mana][i]['result']
+                            x = rsl[7:]
+                            if x != 'Won' and x!='Lost': x = "Drawn"
+                            print(f'> {x:<4}', end=": ")
+                            print('[', end="")
+                            print(", ".join(history[mana][i]['enemy_team']['team']), end="")
+                            print(']')
+                            xx = []
+                            pp = list_name_dict()
+                            for k in history[mana][i]['enemy_team']['team']:
+                                xx.append(str(pp.get(k)))
+                            num = " / ".join(xx)
+                            print(f'Number [{num}]\n')
                 n = input('\n[B]ack\t[R]eturn View team\nSelect: ').upper()
-            if n == 'R': te = 'B'
-        elif te != 'B':
-            print('Invalid syntax!')
-            time.sleep(1)
+                while(n!='R' and n!='B'):
+                    os.system('cls')
+                    print('Invalid syntax!')
+                    n = input('\n[B]ack\t[R]eturn View team\nSelect: ').upper()
+                if n == 'R': te = 'B'
+            elif te != 'B':
+                print('Invalid syntax!')
+                time.sleep(1)
+    else:
+        while (te != 'B'):
+            os.system('cls')
+            print("Select team to view details\n")
+            j = 1
+            for i in team[mana]:
+                print(f'[{j}] {", ".join(i)}')
+                j += 1
+            print('\n[B]ack')
+            te = input('Select team: ').upper()
+            if te.isdigit() and (int(te) - 1 >= 0 and int(te) - 1 < len(team[mana])):
+                te = int(te) - 1
+                b = team[mana][te]
+                kp = kpi(his_path, mana, b)
+                os.system('cls')
+                print(f'Team: {", ".join(b)}')
+                print(f"\nIn {kp[3]} match:")
+                print(f'    Won: {kp[0]}')
+                print(f'    Lost: {kp[1]}')
+                print(f'    Drawn: {kp[2]}')        
+                n = input('\n[B]ack\t[R]eturn View team\nSelect: ').upper()
+                while(n!='R' and n!='B'):
+                    os.system('cls')
+                    print('Invalid syntax!')
+                    n = input('\n[B]ack\t[R]eturn View team\nSelect: ').upper()
+                if n == 'R': te = 'B'
+            elif te != 'B':
+                print('Invalid syntax!')
+                time.sleep(1)
 
 def viewTeam():
     n =''
     while (n != 'Q'):
         os.system('cls')
-        with open(team_path) as json_file:
-            team = json.load(json_file)
-            json_file.close()
-        for i in team:
+        try:
+            with open(team_path) as json_file:
+                team = json.load(json_file)
+                json_file.close()
+        except:
+            team = []
+        if len(team) > 0:
+            for i in team:
+                print('_'*120)
+                print(f'\n MANA {i}:')
+                k = 1
+                for j in team[i]:
+                    kp = kpi(his_path, i, j)
+                    percent = 0.0
+                    if kp[3] != 0: percent = int(kp[0]) / int(kp[3]) *100
+                    p = ", ".join(j)
+                    print(f'{k}. {p}')
+                    print(f'   --> W: {kp[0]}  /  L: {kp[1]}  /  D: {kp[2]} | in {kp[3]} match | Win Rate {round(percent, 2)}%')
+                    k += 1
+                    print()
             print('_'*120)
-            print(f'\n MANA {i}:')
-            k = 1
-            for j in team[i]:
-                kp = kpi(his_path, i, j)
-                percent = 0.0
-                if kp[3] != 0: percent = int(kp[0]) / int(kp[3]) *100
-                p = ", ".join(j)
-                print(f'{k}. {p}')
-                print(f'   --> W: {kp[0]}  /  L: {kp[1]}  /  D: {kp[2]} | in {kp[3]} match | Win Rate {round(percent, 2)}%')
-                k += 1
-                print()
-        print('_'*120)
-        print('\nEnter mana to view details')
-        print('\n[A]dd team\t\t[D]elete team\t\t[Q]uit')
-        n = input('\nSelect: ').upper()
-        if n == 'A': addTeam()
-        elif n == 'D': delTeam()
-        elif n.isdigit() and (team.get(n, 'Non') != 'Non'): analys(n)
-        elif n != 'Q':
-            print('Invalid syntax!')
-            time.sleep(1)
+            print('\nEnter mana to view details')
+            print('\n[A]dd team\t\t[D]elete team\t\t[Q]uit')
+            n = input('\nSelect: ').upper()
+            if n == 'A': addTeam()
+            elif n == 'D': delTeam()
+            elif n.isdigit() and (team.get(n, 'Non') != 'Non'): analys(n)
+            elif n != 'Q':
+                print('Invalid syntax!')
+                time.sleep(1)
+        else:
+            print("VIEW TEAM\n")
+            print("No Team")
+            print('\n[A]dd team\t\t[Q]uit')
+            n = input('\nSelect: ').upper()
+            if n == 'A': addTeam()
+            elif n != 'Q':
+                print('Invalid syntax!')
+                time.sleep(1)
     return 'Q'
 
 def showList(list):
@@ -643,6 +724,7 @@ def showList(list):
 def delTeam():
     with open(team_path) as json_file:
         list_team = json.load(json_file)
+        json_file.close()
     os.system('cls')
     x = input('Enter mana: ')
     lt = list_team.get(x, 'None')
@@ -678,6 +760,7 @@ def delTeam():
         if len(list_team[x]) == 0: list_team.pop(x)
         with open(team_path, 'w') as file:
             b = json.dump(list_team, file, indent=4)
+            file.close()
         os.system('cls')
         print('Done')
         time.sleep(1)
@@ -691,6 +774,7 @@ def ranTeam(team):
 def pickTeam(x):
     with open(team_path) as json_file:
         team = json.load(json_file)
+        json_file.close()
         t = team.get(str(x), "None")
     if t != 'None': return ranTeam(t)
     else: return t
@@ -707,6 +791,7 @@ def createCard():
         card[name[i].text] = {"level": int(lv[2]), "mana": int(mana[i].text)}
     with open(card_path, 'w') as file:
         b = json.dump(card, file, indent=4)
+        file.close()
 
 def addCard():
     n = ''
@@ -737,6 +822,7 @@ def addCard():
         if card[name]['mana'] != 0:
             with open(card_path, 'w') as file:
                 b = json.dump(card, file, indent=4)
+                file.close()
                 n = 'Q'
         else:
             print('Invalid information')
@@ -782,9 +868,12 @@ def showCard():
         with open('./data/color_card.json') as file:
             color = json.load(file)
             file.close()
-        with open('./data/team.json') as file:
-            team_raw = json.load(file)
-            file.close()
+        try:
+            with open('./data/team.json') as file:
+                team_raw = json.load(file)
+                file.close()
+        except Exception as e:
+            team_raw = {}
         list_card_name = []
         for i in card:
             list_card_name.append(i)
@@ -803,6 +892,7 @@ def showCard():
                     break
                 except Exception as e:
                     color_card = 'N/A'
+
             team_ = []
             team = ''
             for j in team_raw:
@@ -814,6 +904,7 @@ def showCard():
                     except Exception as e:
                         team = 'No Team'
             if len(team_) > 0: team = ', '.join(team_)
+            else: team = "This card does not belong to any team"
             print(f"{i+1:>2} {name:<25}{mana:<10}{level:<10}{color_card:<10}{team:<40}")
             x += 1
         print('_'*30)
