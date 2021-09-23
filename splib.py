@@ -865,8 +865,14 @@ def getUpdate():
 
 def check_update():
     print('Checking Update...')
-    response = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/version')
-    new_version = response.text[:5]
+    try:
+        response = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/version')
+    except Exception as e:
+        os.system('cls')
+        print('Error! Unable to check for updates.')
+        time.sleep(2)
+        return 'Q'
+    new_version = response.text.strip()
     if(version != new_version):
         os.system('cls')
         cf = input(f'New Update! Version {new_version}\nDo you want Update? [Y/N]').upper()
