@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 import multiprocessing
 import getpass, time, io, json, random, os, requests, update, re
 
-version = '1.8.21'
+version = '1.8.2'
 username = getpass.getuser()
 usr_path=('C:/Users/', username, '/AppData/Local/Google/Chrome/User Data')
 filePath = ''.join(usr_path)
@@ -243,7 +243,7 @@ def battle(match, acc):
     chrome_options = webdriver.ChromeOptions()
     #chrome_options.add_argument("user-data-dir="+filePath)
     driver = webdriver.Chrome('./data/webdriver/chromedriver', options = chrome_options)
-    wait = WebDriverWait(driver, 150)
+    wait = WebDriverWait(driver, 500)
     #driver.minimize_window()
     driver.get('https://splinterlands.com/?p=battle_history')
     driver.find_element_by_id('log_in_button').click()
@@ -263,96 +263,49 @@ def battle(match, acc):
         driver.execute_script("document.getElementsByClassName('modal-close-new')[0].click();")
     except Exception as e:
         pass
-
-    def SlcRankBtn():
-        try:
-            wait.until(EC.visibility_of_element_located((By.ID, "battle_category_btn")))
-            vf = i+1
-            if vf % 5 == 0:
-                time.sleep(3)
-                writeHistory(driver, his_path, 20)
-                check_point = vf
-            driver.execute_script("var roww = document.getElementsByClassName('row')[1].innerHTML;var reg = /HOW TO PLAY|PRACTICE|CHALLENGE|RANKED/;var resultt = roww.match(reg);while(resultt != 'RANKED'){document.getElementsByClassName('slider_btn')[1].click();roww = document.getElementsByClassName('row')[1].innerHTML;resultt = roww.match(reg);};")
-            time.sleep(1)
-            return 'Pass'
-        except Exception as e:
-            return 1
-
-    def PressBltBtn():
-        try:
-            driver.execute_script("document.getElementsByClassName('big_category_btn red')[0].click();")
-            status('Seeking Enemy...')
-            wait.until(EC.visibility_of_element_located((By.XPATH, "/html/body/div[3]/div/div/div/div[2]/div[3]/div[2]/button")))
-            time.sleep(1)
-            return 'Pass'
-        except Exception as e:
-            return 2
-
-    def SlcCard():
-        try:
-            mana = driver.find_element_by_css_selector('div.col-md-3:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1)').text
-            team = pickTeam(mana)
-            if team == 'None': team = pickranTeam(mana, card)  
-            status('Creating team...')
-            driver.execute_script("document.getElementsByClassName('btn btn--create-team')[0].click();")
-            wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="page_container"]/div/div[1]/div')))
-            status('Picking card...')
-            tm = listToString(team)
-            time.sleep(7)
-            driver.execute_script("var team = "+ tm + ";for (let i = 0; i < team.length; i++) {let card = document.getElementsByClassName('card beta');let cimg = document.getElementsByClassName('card-img');var reg = /[A-Z]\\w+( \\w+'*\\w*)*/;for (let j = 0; j < card.length; j++){let att_card = card[j].innerText;let result = att_card.match(reg);let name = result[0];if (name == team[i]){cimg[j].click();break;}}}document.getElementsByClassName('btn-green')[0].click();")
-            return 'Pass'
-        except Exception as e:
-            return 3
-
-    def Rumbling():
+    check_point = 0
+    clone_i = 0
+    for i in range(int(match)):
+        clone_i = i+1
+        wait.until(EC.visibility_of_element_located((By.ID, "battle_category_btn")))
+        vf = i+1
+        if vf % 5 == 0:
+            time.sleep(3)
+            writeHistory(driver, his_path, 20)
+            check_point = vf
+        driver.execute_script("var roww = document.getElementsByClassName('row')[1].innerHTML;var reg = /HOW TO PLAY|PRACTICE|CHALLENGE|RANKED/;var resultt = roww.match(reg);while(resultt != 'RANKED'){document.getElementsByClassName('slider_btn')[1].click();roww = document.getElementsByClassName('row')[1].innerHTML;resultt = roww.match(reg);};")
+        time.sleep(1)
+        status('Seeking Enemy...')
+        driver.execute_script("document.getElementsByClassName('big_category_btn red')[0].click();")
+        wait.until(EC.visibility_of_element_located((By.XPATH, "/html/body/div[3]/div/div/div/div[2]/div[3]/div[2]/button")))
+        time.sleep(1)
+        mana = driver.find_element_by_css_selector('div.col-md-3:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1)').text
+        team = pickTeam(mana)
+        if team == 'None': team = pickranTeam(mana, card)     
+        status('Creating team...')
+        driver.execute_script("document.getElementsByClassName('btn btn--create-team')[0].click();")
+        #Select card
+        wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="page_container"]/div/div[1]/div')))
+        status('Picking card...')
+        tm = listToString(team)
+        time.sleep(7)
+        driver.execute_script("var team = "+ tm + ";for (let i = 0; i < team.length; i++) {let card = document.getElementsByClassName('card beta');let cimg = document.getElementsByClassName('card-img');var reg = /[A-Z]\\w+( \\w+'*\\w*)*/;for (let j = 0; j < card.length; j++){let att_card = card[j].innerText;let result = att_card.match(reg);let name = result[0];if (name == team[i]){cimg[j].click();break;}}}document.getElementsByClassName('btn-green')[0].click();")       
         try:
             status('Waiting...')
             WebDriverWait(driver, 150).until(EC.visibility_of_element_located((By.CSS_SELECTOR, '#btnRumble')))
             driver.execute_script("document.getElementsByClassName('btn-battle')[0].click()")
             status('Rumbling...')
-            return 'Pass'
-        except Exception as e:
-            return 4
-    
-    def skiping():
-        try:
             time.sleep(3.5)
             status('Skiping')
+            #wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '#btnSkip')))
             driver.execute_script("document.getElementsByClassName('btn-battle')[1].click()")
-            return 'Pass'
-        except:
-            return 5
-
-    def closeResult():
-        try:
-            wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="dialog_container"]/div/div/div/div[1]/h1')))
-            driver.execute_script("document.getElementsByClassName('btn btn--done')[0].click();")
-            status('Done')
-            return 'Pass'
         except Exception as e:
-            return 6
-
-    def execute(x):
-        if x == '1': step = SlcRankBtn()
-        elif x == '2': step = PressBltBtn()
-        elif x == '3': step = SlcCard()
-        elif x == '4': step = Rumbling()
-        elif x == '5': step = skiping()
-        elif x == '6': step = closeResult()
-        return step
-
-    check_point = 0
-    clone_i = 0
-    for i in range(int(match)):
-        clone_i = i+1
-        exe = 1
-        while(exe < 7):
-            j = execute(str(exe))
-            if j != 'Pass':
-                driver.refresh()
-                exe = int(j)
-            else:
-                exe += 1
+            status('Done')
+            wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="dialog_container"]/div/div/div/div[1]/h1')))
+            driver.execute_script("document.getElementsByClassName('btn btn--done')[0].click();")        
+        wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="dialog_container"]/div/div/div/div[1]/h1')))
+        driver.execute_script("document.getElementsByClassName('btn btn--done')[0].click();")
+        status('Done')
     time.sleep(3) 
     times_when_smaller_20 = clone_i - check_point
     if times_when_smaller_20 > 0: writeHistory(driver, his_path, times_when_smaller_20)
