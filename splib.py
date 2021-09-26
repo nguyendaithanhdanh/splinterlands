@@ -991,11 +991,7 @@ def btn(x,li):
     return check
 
 def main():
-    select = ''
-    upd = check_update()
-    if upd == 'OK': select = 'Q'
-    else:
-        select = menu()
+    select = menu()
     while (select != 'Q'):
         os.system('cls')
         if (select == '1'):
