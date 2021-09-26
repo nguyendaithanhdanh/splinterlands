@@ -950,37 +950,6 @@ def shutDown(mess):
         print(f'Shut down in {i}')
         time.sleep(1)
 
-def getUpdate():
-    response = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/update.py')
-    saveFile('update.py', response.text)
-
-def check_update():
-    print('Checking Update...')
-    try:
-        response = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/version')
-    except Exception as e:
-        os.system('cls')
-        print('Error! Unable to check for updates.')
-        time.sleep(2)
-        return 'Q'
-    new_version = response.text.strip()
-    if(version != new_version):
-        os.system('cls')
-        cf = input(f'New Update! Version {new_version}\nDo you want Update? [Y/N]').upper()
-        while(cf != 'Y' and cf != 'N'):
-            os.system('cls')
-            print("Invalid syntax! Try again.")
-            cf = input(f'  New Update! Version {new_version}\nDo you want Update? [Y/N]').upper()
-        if (cf == 'Y'):
-            os.system('cls')
-            print('Updating...')
-            getUpdate()
-            update.update_lib()
-            os.system('cls')
-            time.sleep(1)
-            shutDown('Updated!')
-            return 'OK'
-
 def btn(x,li):
     if (x.isalpha()): x = x.upper()
     check = False
