@@ -960,7 +960,6 @@ def btn(x,li):
     return check
 
 def main():
-    os.remove('splib.py')
     select = menu()
     while (select != 'Q'):
         os.system('cls')
