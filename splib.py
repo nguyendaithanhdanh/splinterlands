@@ -6,7 +6,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.expected_conditions import presence_of_element_located
 from bs4 import BeautifulSoup
 import multiprocessing
-import getpass, time, io, json, random, os, requests, update, re
+import getpass, time, io, json, random, os, requests re
 
 version = '1.8.2'
 username = getpass.getuser()
