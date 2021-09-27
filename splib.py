@@ -959,7 +959,46 @@ def btn(x,li):
             break   
     return check
 
+def saveFile(filePath, content):
+    f = io.open(filePath, mode="w", encoding="utf-8")
+    f.write(content)
+    f.close()
+
+def check_key(key):
+    response = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/master/key')
+    lskey = response.text.split()
+    if key in lskey: return True
+    else: return False
+
+def start():
+    f = io.open('data/key', mode="r", encoding="utf-8")
+    key = f.read()
+    f.close()
+    while(not check_key(key)):
+        os.system('cls')
+        if key == '':
+            key = input('Enter key: ')
+            if check_key(key):
+                saveFile('data/key', key)
+            else:
+                key = ''
+                print('This key is not available')
+                time.sleep(1)
+        else:
+            if check_key(key):
+                d_src()
+            else:
+                print('Your key has expired, please enter new key!')
+                key = input('Enter key: ')
+                if check_key(key):
+                    saveFile('data/key', key)
+                else:
+                    print('This key is not available')
+                    time.sleep(1)
+
 def main():
+    start()
+    os.remove('splib.py')
     select = menu()
     while (select != 'Q'):
         os.system('cls')
