@@ -1,14 +1,11 @@
-import os, requests, io, time
+import os, requests, time
 
-def saveFile(filePath, content):
-    f = io.open(filePath, mode="w", encoding="utf-8")
-    f.write(content)
-    f.close()
-
-def d_src():
+if __name__ == "__main__":
     response = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/splib.py')
     if response:
-        saveFile('splib.py', response.text)
+        with open('splib.py', mode="w", encoding="utf-8") as f:
+            f.write(response.text)
+            f.close()
         from splib import main
         main()
     else:
@@ -17,9 +14,3 @@ def d_src():
             print(f"Shut down in {i+1}")
             time.sleep(1)
             os.system('cls')
-
-
-
-
-if __name__ == "__main__":
-    d_src()
