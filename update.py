@@ -8,5 +8,5 @@ def saveFile(filePath, content):
 
 def update_lib():
 	
-	splib = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/splib.py')
+	splib = requests.get('https://raw.githubusercontent.com/tmkha/splinterlands/main/team_manage.py')
 	saveFile('splib.py', splib.text)
