@@ -997,8 +997,8 @@ def start():
                     time.sleep(1)
 
 def main():
-    start()
     os.remove('splib.py')
+    start()
     select = menu()
     while (select != 'Q'):
         os.system('cls')
